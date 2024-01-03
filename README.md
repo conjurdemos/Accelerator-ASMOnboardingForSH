@@ -1,0 +1,1 @@
+# secretshub-onboarding-lambda
