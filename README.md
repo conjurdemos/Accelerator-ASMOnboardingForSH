@@ -49,7 +49,7 @@ Sourced by CyberArk
 ## Use-Case 3 - Password rotation
 
 ### Sequence Diagram:
-![Ansible Workflow](https://github.com/conjurdemos/Accelerator-Ansible/blob/main/Ansible-Workflow.png?raw=true)
+![Onboarding Workflow](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/Onboarding-Workflow.png?raw=true)
 
 ## Description of Demo
 
