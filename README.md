@@ -1,6 +1,5 @@
 # Accelerator-ASMOnboardingForSH
-###Onboarding of AWS RDS secrets from AWS Secrets Manager to CyberArk Vaults
-#### with rotation by CPM and syncing with Secrets Hub
+### Onboarding of AWS RDS secrets from AWS Secrets Manager to CyberArk Vaults with rotation by CPM and syncing with Secrets Hub
 
 ## Goals:
 - Show how to enable CyberArk Privilege Cloud to manage AWS RDS secrets that were first created in AWS Secrets Manager.
