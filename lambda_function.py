@@ -8,21 +8,20 @@ import boto3
 from botocore.exceptions import ClientError
 
 # CONSTANTS
-
 DEBUG=False
 
-# environment variable containing name of admin secret in ASM
+# environment variable containing name of Pcloud admin secret in ASM
 PCLOUD_ADMIN_SECRET_ENV_VAR="PrivilegeCloudSecret"
 
 #-------------------------------------------
 def urlify(s):
-    """URL encodes a given string"""
+    # URL encodes a given string
     return urllib.parse.quote(s)
 
 #-------------------------------------------
 def prologOut(event, context):
-    # Print the event to see its structure (useful for debugging)
-    #print("Received event: " + json.dumps(event, indent=2))
+    if DEBUG:
+        print("Received event: " + json.dumps(event, indent=2))
 
     # Print the context to see its structure (useful for debugging)
     print("Lambda function ARN: " + context.invoked_function_arn)
@@ -36,21 +35,27 @@ def validateSecretTags(secrets_manager_client, secret_id):
   # Validate secret is tagged w/ 'Sourced by CyberArk' - if not, flag as not found
   # returns dictionary of secret tags, status_code & response_body message
 
+        tags_dict = {}
         status_code = 200
-        response_body = json.dumps(f"Secret {secret_id} sourced by CyberArk")
-        
-        # Retrieve tags of the secret
-        response = secrets_manager_client.describe_secret(SecretId=secret_id)
-        tags = response.get('Tags', [])
-        tags_dict = {tag['Key']: tag['Value'] for tag in tags}
+        response_body = f"Secret {secret_id} sourced by CyberArk"
 
-        if 'Sourced by CyberArk' not in tags_dict:
-            status_code = 404
-            response_body = f"Secret {secret_id} not sourced by CyberArk"
+      # Retrieve tags of the secret
+        try:
+            response = secrets_manager_client.describe_secret(SecretId=secret_id)
+        except ClientError as e:
+            status_code = 500,
+            response_body = json.dumps(f"Error retrieving tags for secret: {e}")
+        else:
+            tags = response.get('Tags', [])
+            tags_dict = {tag['Key']: tag['Value'] for tag in tags}
+
+            if 'Sourced by CyberArk' not in tags_dict:
+                status_code = 404
+                response_body = f"Secret {secret_id} not sourced by CyberArk"
 
         if DEBUG:
-           print("validateSecretTags()================") 
-           print(f"\tsecret_id: {secret_id}")
+           print("================ validateSecretTags() ================")
+           print(f"\tsecret_id: {secret_id}\n\ttags_dict: {tags_dict}")
            print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
 
         return tags_dict, status_code, response_body
@@ -93,7 +98,7 @@ def getAsmSecretValue(secrets_manager_client, secret_id):
 
 
         if DEBUG:
-           print("getAsmSecretValue() ================")
+           print("================ getAsmSecretValue() ================")
            print(f"\tsecret_id: {secret_id}\n\tsecret_value: {secret_value}")
            print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
 
@@ -128,15 +133,15 @@ def authnCyberArk(cyberark_dict):
             response_body = json.dumps(f"There was a problem authenticating to: {cyberark_dict['subdomain']}.privilegecloud.cyberark.cloud")
 
         if DEBUG:
-           print("authnCyberark() ================")
+           print("================ authnCyberark() ================")
            print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
 
         return session_token, status_code, response_body
 
 #-------------------------------------------
-def createSafe(cyberark_dict):
+def createSafe(cyberark_dict, session_token):
   # Uses info in dictionary to create a safe in Privilege Cloude
-  # returns status_code == 201 on success & response_body message
+  # returns status_code == 201 on success with response_body message
 
         status_code = 201
         response_body = f"Safe {cyberark_dict['safe']} created successfully"
@@ -155,16 +160,15 @@ def createSafe(cyberark_dict):
             'Authorization': f'Bearer {session_token}'
         }
         response = requests.request("POST", url, headers=headers, data=payload, timeout=30)
-        print(f"Safe Response Message: {response.text}")
         if response.status_code == 409:
             status_code = 409
             response_body = json.dumps(f"Safe {cyberark_dict['safe']} already exists")
         else:
             status_code = 500
-            response_body = json.dumps(f"There was a problem creating safe {cyberark_dict['safe']}")
+            response_body = response.text
 
         if DEBUG:
-           print("createSafe() ================")
+           print("================ createSafe() ================")
            print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
 
         return status_code, response_body
@@ -217,7 +221,7 @@ def assembleOnboardingDict(pcloud_secret_dict, tags_dict, secret_dict):
             response_body =json.dumps(f"Required key value(s) not found: {none_keys}")
 
         if DEBUG:
-           print("assembleOnboardingDict() ================")
+           print("================ assembleOnboardingDict() ================")
            print(f"\ncyberark_dict: {cyberark_dict}")
            print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
 
@@ -263,73 +267,65 @@ def onboardAccount(cyberark_dict, session_token):
             response_body = json.dumps(f"{response.text}")
 
         if DEBUG:
-           print("onboardAccount() ================")
+           print("================ onboardAccount() ================")
            print(f"\turl: {url}\n\tpayload: {payload}")
            print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
 
         return status_code, response_body
 
-#############################################
-#############################################
+##########################################################################################
 # Lambda function handler (main entrypoint)
+##########################################################################################
 
 def lambda_handler(event, context):
-    prologOut(event, context)
 
-    try:
-      # Extract the ID of secret to onboard from the triggering event
-        secret_id = event['detail']['requestParameters']['name']
+      prologOut(event, context)
 
-      # Initialize a client for AWS Secrets Manager
-        secrets_manager_client = boto3.client('secretsmanager')
+    # Extract the ID of secret to onboard from the triggering event
+      secret_id = event['detail']['requestParameters']['name']
 
-      # Validate secret is correctly tagged for onboarding
-        tags_dict, status_code, response_body = validateSecretTags(secrets_manager_client, secret_id)
-        if status_code != 200:
+    # Initialize a client for AWS Secrets Manager
+      secrets_manager_client = boto3.client('secretsmanager')
+
+    # Validate secret is correctly tagged for onboarding
+      tags_dict, status_code, response_body = validateSecretTags(secrets_manager_client, secret_id)
+      if status_code != 200:
+        return { 'statusCode': status_code, 'body': response_body }
+
+    # Retrieve from env var the ID of ASM secret storing admin creds
+      pcloud_secret_id = os.environ.get(PCLOUD_ADMIN_SECRET_ENV_VAR, None)
+      if pcloud_secret_id is None:
+          response_body = f"Env var '{PCLOUD_ADMIN_SECRET_ENV_VAR}' not found in lambda environment variables." 
+          return { 'statusCode': 404, 'body': response_body }
+
+    # Get Pcloud admin creds from ASM
+      pcloud_secret_dict, status_code, response_body = getAsmSecretValue(secrets_manager_client, pcloud_secret_id)
+      if status_code != 200:
+        return { 'statusCode': status_code, 'body': response_body }
+
+    # Retrieve the value of the secret to onboard
+      secret_dict, status_code, response_body = getAsmSecretValue(secrets_manager_client, secret_id)
+      if status_code != 200:
+        return { 'statusCode': status_code, 'body': response_body }
+
+    # Assemble all info into a single onboarding dictionary
+      onboarding_dict, status_code, response_body = assembleOnboardingDict(pcloud_secret_dict, tags_dict, secret_dict)
+      if status_code != 200:
+        return { 'statusCode': status_code, 'body': response_body }
+
+    # Authenticate to Privilege Cloud
+      session_token, status_code, response_body  = authnCyberArk(onboarding_dict)
+      if status_code != 200:
+         return { 'statusCode': status_code, 'body': response_body }
+
+    # Create safe in Privilege Cloud
+      status_code, response_body = createSafe(onboarding_dict, session_token)
+      if status_code != 201:
           return { 'statusCode': status_code, 'body': response_body }
 
-      # Retrieve the id of secret holding admin creds from env var
-        pcloud_secret_id = os.environ.get(PCLOUD_ADMIN_SECRET_ENV_VAR, None)
-        if pcloud_secret_id is None:
-            return { 'statusCode': 404,
-                     'body': f"Env var '{PCLOUD_ADMIN_SECRET_ENV_VAR}' not found in lambda environment variables." 
-            }
+    # Onboard account into safe
+      status_code, response_body = onboardAccount(onboarding_dict, session_token)
+      if status_code != 201:
+         return { 'statusCode': status_code, 'body': response_body }
 
-      # Get Pcloud admin creds from ASM
-        pcloud_secret_dict, status_code, response_body = getAsmSecretValue(secrets_manager_client, pcloud_secret_id)
-        if status_code != 200:
-          return { 'statusCode': status_code, 'body': response_body }
-
-      # Retrieve the secret value of the secret
-        secret_dict, status_code, response_body = getAsmSecretValue(secrets_manager_client, secret_id)
-        if status_code != 200:
-          return { 'statusCode': status_code, 'body': response_body }
-
-      # Assemble all info into a single onboarding dictionary
-        onboarding_dict, status_code, response_body = assembleOnboardingDict(pcloud_secret_dict, tags_dict, secret_dict)
-        if status_code != 200:
-          return { 'statusCode': status_code, 'body': response_body }
-
-      # Authenticate to Privilege Cloud
-        session_token, status_code, response_body  = authnCyberArk(onboarding_dict)
-        if status_code != 200:
-           return { 'statusCode': status_code, 'body': response_body }
-
-      # Create safe in Privilege Cloud
-#       status_code, response_body = createSafe(onboarding_dict)
-#        if status_code != 201:
-#           return { 'statusCode': status_code, 'body': response_body }
-
-      # Onboard account into safe
-        status_code, response_body = onboardAccount(onboarding_dict, session_token)
-        if status_code != 201:
-           return { 'statusCode': status_code, 'body': response_body }
-
-    except ClientError as e:
-        print(f"An error occurred: {e}")
-        return {
-            'statusCode': 500,
-            'body': json.dumps(f"Error retrieving tags for secret: {e}")
-        }
-
-    return { 'statusCode': 200, 'body': f"Secret {secret_id} onboarded successfully." }
+      return { 'statusCode': 200, 'body': f"Secret {secret_id} onboarded successfully." }
