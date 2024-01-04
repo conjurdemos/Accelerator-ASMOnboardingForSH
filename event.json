@@ -1,0 +1,48 @@
+{
+  "version": "0",
+  "id": "4725d455-933f-495b-56d9-5ab003cd633f",
+  "detail-type": "AWS API Call via CloudTrail",
+  "source": "aws.secretsmanager",
+  "account": "123456789012",
+  "time": "2023-12-20T14:39:19Z",
+  "region": "us-east-1",
+  "resources": [],
+  "detail": {
+    "eventVersion": "1.08",
+    "userIdentity": {
+      "type": "AssumedRole",
+      "principalId": "XXXXXMQ3O54UAIGXXXX:joe.garcia@pineappledev.app",
+      "arn": "arn:aws:sts::123456789012:assumed-role/InfamousDevOps-AWSSAML/joe.garcia@pineappledev.app",
+      "accountId": "123456789012",
+      "accessKeyId": "XXXXXMQ3O54UAIGXXXX",
+      "userName": "aws-cli"
+    },
+    "eventTime": "2023-12-20T14:39:19Z",
+    "eventSource": "secretsmanager.amazonaws.com",
+    "eventName": "CreateSecret",
+    "awsRegion": "us-east-1",
+    "sourceIPAddress": "68.207.237.139",
+    "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "requestParameters": {
+      "name": "PIN-INF-SECRETSHUB-TEST/TestAccount9",
+      "clientRequestToken": "29c1f156-a9b2-4883-9bc9-96f9e0fdd53a",
+      "description": "",
+      "forceOverwriteReplicaSecret": false
+    },
+    "responseElements": {
+      "arn": "arn:aws:secretsmanager:us-east-1:123456789012:secret:PIN-INF-SECRETSHUB-TEST/TestAccount-ZQHd8a"
+    },
+    "requestID": "bfc28544-43fd-4d27-a47c-80ca7fe90948",
+    "eventID": "caf31152-9114-4a1a-8497-b06ab5443c3d",
+    "readOnly": false,
+    "eventType": "AwsApiCall",
+    "managementEvent": true,
+    "recipientAccountId": "123456789012",
+    "eventCategory": "Management",
+    "tlsDetails": {
+      "tlsVersion": "TLSv1.3",
+      "cipherSuite": "TLS_AES_128_GCM_SHA256",
+      "clientProvidedHostHeader": "secretsmanager.us-east-1.amazonaws.com"
+    }
+  }
+}
