@@ -71,8 +71,8 @@
 - Role: AWS admin user
 - Tasks:
   - Upload deployment-package.zip to create lambda function
+  - Increase lambda default timeout to more than 10 seconds in Configuration->General Configuration
   ![Lambda config](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/lambda-config.png?raw=true)
-  - Increase lambda default timeout to 20 seconds in Configuration->General Configuration
   ![Lambda timeout](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/lambda-timeout.png?raw=true)
   - Create env var named PrivilegeCloudSecret with name of ASM secret for the CyberArk service account credentials
   ![Lambda env var](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/lambda-env-vars.png?raw=true)
