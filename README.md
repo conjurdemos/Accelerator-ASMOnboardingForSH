@@ -55,29 +55,29 @@
       - key: username, value: username of CyberArk Identity Oauth2 service user
       - key: password, value: password of CyberArk Identity Oauth2 service user
     - secret tags: none required
-    - ![Admin secret](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/admin-secret.png?raw=true)
+    ![Admin secret](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/admin-secret.png?raw=true)
   - Create a test RDS secret for onboarding:
     - secret name: whatever you want, this value will be extracted from a test event
     - secret values: automatically created per the RDS database
-    - ![Onboarding secret values](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/rds-values.png?raw=true)
+    ![Onboarding secret values](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/rds-values.png?raw=true)
     - secret tags:
       - CyberArk Safe - name of safe, see specifications above
       - CyberArk Platform - name of platform with RDS-specific properties added
       - CyberArk Account - name to give account in Safe
       - Sourced by CyberArk - no value needed
-    - ![Onboarding secret tags](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/rds-tags.png?raw=true)
+    ![Onboarding secret tags](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/rds-tags.png?raw=true)
 
 ### Step Three: AWS Lambda setup
 - Role: AWS admin user
 - Tasks:
   - Upload deployment-package.zip to create lambda function
-  - ![Lambda config](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/lambda-config.png?raw=true)
+  ![Lambda config](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/lambda-config.png?raw=true)
   - Increase lambda default timeout to 20 seconds in Configuration->General Configuration
-  - ![Lambda timeout](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/lambda-timeout.png?raw=true)
+  ![Lambda timeout](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/lambda-timeout.png?raw=true)
   - Create env var named PrivilegeCloudSecret with name of ASM secret for the CyberArk service account credentials
-  - ![Lambda env var](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/lambda-env-vars.png?raw=true)
+  ![Lambda env var](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/lambda-env-vars.png?raw=true)
   - Add test event
-  - ![Lambda test event](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/test-event.png?raw=true)
+  ![Lambda test event](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/test-event.png?raw=true)
   - Lambda internet access
     - Default lambda environment has internet access, but if you attach it to a VPC, VPC must have a NAT gateway
     - https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html
