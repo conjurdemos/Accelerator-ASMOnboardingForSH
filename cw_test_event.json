@@ -24,7 +24,7 @@
     "sourceIPAddress": "68.207.237.139",
     "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "requestParameters": {
-      "name": "PIN-INF-SECRETSHUB-TEST/TestAccount9",
+      "name": "REPLACE THIS WITH THE NAME OF YOUR ASM SECRET",
       "clientRequestToken": "29c1f156-a9b2-4883-9bc9-96f9e0fdd53a",
       "description": "",
       "forceOverwriteReplicaSecret": false

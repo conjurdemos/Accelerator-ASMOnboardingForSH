@@ -1,6 +1,5 @@
 # Accelerator-ASMOnboardingForSH
-###Onboarding of AWS RDS secrets from AWS Secrets Manager to CyberArk Vaults
-#### with rotation by CPM and syncing with Secrets Hub
+###Automated onboarding of AWS RDS secrets from AWS Secrets Manager to CyberArk Vaults with rotation by CPM and syncing with Secrets Hub
 
 ## Goals:
 - Show how to enable CyberArk Privilege Cloud to manage AWS RDS secrets that were first created in AWS Secrets Manager.
@@ -8,13 +7,24 @@
 - Enable CPM to rotate secret and SecretsHub to sync secrets back to the same ASM secret.
 
 ## Prerequisites
- - Admin access to an AWS account with admin access for Lambda & AWS Secrets Manager services.
- - Admin access to a NON-PRODUCTION Cyberark Identity tenant
- - Admin access to a NON-PRODUCTION CyberArk Privilege Cloud tenant
- - Admin access to a NON-PRODUCTION CyberArk Secrets Hub tenant
- - A Safe in Privilege Cloud with the above service user as member with Access and Account Management permissions, and the 'Conjur Sync' user as member with Access and Workflow permissions.
- - A demo host - a MacOS or Linux VM environment with Docker or Podman installedand IPV4 network access to the CyberArk tenants.
- - Make sure all scripts are executable. Run: chmod -R +x *.sh
+- Roles:
+  - AWS interactive user
+    - Requires admin rights to:
+      - Lambda - to create & test the lambda function
+      - AWS Secrets Manager - to create the admin secret
+  - CyberArk Identity user (human)
+    - Requires admin rights to a NON-PRODUCTION tenant for Privilege Cloud
+    - Imports platforms for ASM RDS accounts
+    - Creates safes for secret onboarding
+  - CyberArk Identity service user (non-human Oauth2 confidential client)
+    - Requires admin rights to NON-PRODUCTION tenants for:
+      - CyberArk Privilege Cloud - to onboard secret
+      - CyberArk Secrets Hub - to create sync policies
+- Resources:
+  - A Safe in Privilege Cloud with:
+    - the CyberArk Identity service user as safe member with Access and Account Management permissions, and
+    - the 'SecretsHub' user as member with Access and Workflow permissions.
+  - Make sure all scripts are executable. Run: chmod -R +x *.sh
 
 ## STEP ONE: Manual Setup
    - https://aws.amazon.com/blogs/security/how-to-connect-to-aws-secrets-manager-service-within-a-virtual-private-cloud/
@@ -23,11 +33,11 @@
  - increase lambda default timeout in Configuration->General Configuration
  - create ASM secret for CyberArk service account:
    - key: subdomain
-     value: tenant subdomain prefix
+     value: subdomain prefix CyberArk Privilege Cloud tenant
    - key: username
-     value: Oauth2 service user username
+     value: username of CyberArk Identity Oauth2 service user
    - key: password
-     value: Oauth2 service user password
+     value: password of CyberArk Identity Oauth2 service user 
  - create env var named PrivilegeCloudSecret with name of ASM secret.
 
 ASM secrets must have these tags:
