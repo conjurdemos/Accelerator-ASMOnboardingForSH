@@ -8,6 +8,7 @@ import boto3
 from botocore.exceptions import ClientError
 
 # CONSTANTS
+# Be sure to set to False for production to prevent secret leakage
 DEBUG = False
 
 # environment variable containing name of Pcloud admin secret in ASM
