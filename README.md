@@ -71,6 +71,8 @@
 - Role: AWS admin user
 - Tasks:
   - Upload deployment-package.zip to create lambda function
+  - Add permissions for ASM
+  ![Lambda config](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/lambda-permissions.png?raw=true)
   - Increase lambda default timeout to more than 10 seconds in Configuration->General Configuration.
   ![Lambda config](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/lambda-config.png?raw=true)
   ![Lambda timeout](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/lambda-timeout.png?raw=true)
