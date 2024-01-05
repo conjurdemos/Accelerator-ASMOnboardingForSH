@@ -46,7 +46,7 @@ def validateSecretTags(secrets_manager_client, secret_id):
     try:
         response = secrets_manager_client.describe_secret(SecretId=secret_id)
     except ClientError as e:
-        status_code = (500,)
+        status_code = 500
         response_body = json.dumps(f"Error retrieving tags for secret: {e}")
     else:
         tags = response.get("Tags", [])
@@ -139,7 +139,7 @@ def authnCyberArk(cyberark_dict):
                 f"There was a problem authenticating to: {cyberark_dict['subdomain']}.privilegecloud.cyberark.cloud"
             )
     else:
-        status_code = (500,)
+        status_code = 500
         response_body = json.dumps(
             f"There was a problem authenticating to: {cyberark_dict['subdomain']}.privilegecloud.cyberark.cloud"
         )
