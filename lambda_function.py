@@ -150,7 +150,6 @@ def authnCyberArk(cyberark_dict):
 
     return session_token, status_code, response_body
 
-
 # -------------------------------------------
 def createSafe(cyberark_dict, session_token):
     # Uses info in dictionary to create a safe in Privilege Cloude
@@ -159,7 +158,6 @@ def createSafe(cyberark_dict, session_token):
     status_code = 201
     response_body = f"Safe {cyberark_dict['safe']} created successfully"
 
-    # Create safe
     url = f"https://{cyberark_dict['subdomain']}.privilegecloud.cyberark.cloud/passwordvault/api/safes"
     payload = json.dumps(
         {
@@ -188,7 +186,6 @@ def createSafe(cyberark_dict, session_token):
 
     return status_code, response_body
 
-
 # -------------------------------------------
 def assembleOnboardingDict(pcloud_secret_dict, tags_dict, secret_dict):
     #
@@ -196,8 +193,6 @@ def assembleOnboardingDict(pcloud_secret_dict, tags_dict, secret_dict):
 
     status_code = 200
     response_body = "Onboarding dictionary assembled successfully."
-
-    # Construct dictionary of CyberArk metadata from pcloud, tags and secret dicts
     cyberark_dict = {
         # values pulled from service account secret
         "subdomain": pcloud_secret_dict.get("subdomain", None),
@@ -238,7 +233,6 @@ def assembleOnboardingDict(pcloud_secret_dict, tags_dict, secret_dict):
         print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
 
     return cyberark_dict, status_code, response_body
-
 
 # -------------------------------------------
 def onboardAccount(cyberark_dict, session_token):
@@ -287,7 +281,6 @@ def onboardAccount(cyberark_dict, session_token):
         print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
 
     return status_code, response_body
-
 
 ##########################################################################################
 # Lambda function handler (main entrypoint)

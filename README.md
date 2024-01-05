@@ -71,15 +71,15 @@
 - Role: AWS admin user
 - Tasks:
   - Upload deployment-package.zip to create lambda function
-  - Increase lambda default timeout to more than 10 seconds in Configuration->General Configuration
+  - Increase lambda default timeout to more than 10 seconds in Configuration->General Configuration.
   ![Lambda config](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/lambda-config.png?raw=true)
   ![Lambda timeout](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/lambda-timeout.png?raw=true)
-  - Create env var named PrivilegeCloudSecret with name of ASM secret for the CyberArk service account credentials
+  - Create env var named PrivilegeCloudSecret with name of ASM secret for the CyberArk service account credentials.
   ![Lambda env var](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/lambda-env-vars.png?raw=true)
-  - Add test event
+  - Add the simple test event, edited with the name of the secret to onboard.
   ![Lambda test event](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/test-event.png?raw=true)
   - Lambda internet access
-    - Default lambda environment has internet access, but if you attach it to a VPC, VPC must have a NAT gateway
+    - Default lambda environment has internet access, but if you attach it to a VPC, the VPC must have a NAT gateway configured.
     - https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html
     - https://aws.amazon.com/blogs/security/how-to-connect-to-aws-secrets-manager-service-within-a-virtual-private-cloud/
 
