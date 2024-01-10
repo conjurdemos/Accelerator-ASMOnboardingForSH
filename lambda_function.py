@@ -674,21 +674,21 @@ def lambda_handler(event, context):
     if status_code != 200:
         return {"statusCode": status_code, "body": response_body}
 
-    # Get filter for Safe (returns existing if found, creates if not found)
+    # Get filter for Safe - returns existing if found, creates if not found
     filter_id, status_code, response_body = getSHFilterForSafe(
         onboarding_dict, session_token, sstore_id
     )
     if status_code not in [200, 201]:
         return {"statusCode": status_code, "body": response_body}
 
-    # Get Secrets Hub target store ID
+    # Get Secrets Hub target store ID - returns existing if found, creates if not found
     tstore_id, status_code, response_body = getSHTargetStoreId(
         onboarding_dict, session_token
     )
     if status_code not in [200, 201]:
         return {"statusCode": status_code, "body": response_body}
 
-    # Create sync policy linking Source to Target (checks for duplicates, returns existing if found)
+    # Create sync policy linking Source to Target - returns existing if found, creates if not found
     policy_id, status_code, response_body = getSHSyncPolicy(
         onboarding_dict, session_token, sstore_id, tstore_id, filter_id
     )

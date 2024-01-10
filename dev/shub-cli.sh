@@ -19,14 +19,14 @@ showUsage() {
   echo "    $0 store_id_get \"<store-name-in-quotes>\" - gets just the store ID."
   echo "    $0 store_get <store-id> - returns individual store record."
   echo "    $0 store_status <store-id> - returns connection status for store."
-  echo "    $0 store_create <type> <account-alias> <account-id> <region> <role-name> <description> <name> NOT IMPLEMENTED YET"
+  echo "    $0 store_target_create <name> <description> <type> <account-alias> <account-id> <region> <role-name>"
   echo "    $0 store_delete <store-id> NOT IMPLEMENTED YET"
   echo
   echo "  Secrets Filter commands:"
   echo "    NOTE: Filter commands only work for SECRETS_SOURCE."
   echo "    $0 filters_get <source-store-id>"
   echo "    $0 filter_get <source-store-id> <filter-id>"
-  echo "    $0 filters_create <source-store-id>"
+  echo "    $0 filter_create <source-store-id> <safe-name>"
   echo "    $0 filter_delete <source-store-id> <filter-id>"
   echo
   echo "  Sync Policy commands:"
@@ -78,6 +78,20 @@ main() {
 	command=$1
 	storeName="$2"
 	;;
+    store_target_create)
+	if [[ $# != 8 ]]; then
+	  echo "Incorrect number of arguments."
+	  showUsage
+	fi
+	command=$1
+	storeName="$2"
+	description="$3"
+	storeType="$4"
+	accountAlias="$5"
+	accountId="$6"
+	regionId="$7"
+	roleName="$8"
+	;;
     filter_get)
 	if [[ $# != 3 ]]; then
 	  echo "Incorrect number of arguments."
@@ -92,9 +106,9 @@ main() {
 	  echo "Incorrect number of arguments."
 	  showUsage
 	fi
-	command=$1
-	storeId=$2
-	safeName=$3
+	command="$1"
+	storeId="$2"
+	safeName="$3"
 	;;
     filter_delete)
 	if [[ $# != 3 ]]; then
@@ -205,6 +219,23 @@ main() {
 	| jq -r "$query"
 	;;
 
+    store_target_create)
+	$CURL -X POST                          		\
+	  -H "$authHeader"				\
+          "${CYBERARK_SHUB_API}/secret-stores"		\
+	  -d "{
+                \"name\": \"$storeName\",
+                \"description\": \"$description\",
+                \"type\": \"$storeType\",
+                \"data\": {
+                    \"accountAlias\": \"$accountAlias\",
+                    \"accountId\": \"$accountId\",
+                    \"regionId\": \"$regionId\",
+                    \"roleName\": \"$roleName\"
+                }
+            }" | jq .
+	;;
+
     store_status)
 	$CURL -X GET                          		\
 	  -H "$authHeader"				\
@@ -231,7 +262,7 @@ main() {
 		\"data\": {				\
 			\"safeName\": \"$safeName\"	\
 		},					\
-		\"type\": \"PAM_SAFE\"			\	
+		\"type\": \"PAM_SAFE\"			\
 	      }"
 	;;
 
