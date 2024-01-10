@@ -9,7 +9,7 @@ from botocore.exceptions import ClientError
 
 # CONSTANTS
 # Be sure to set to False for production to prevent secret leakage
-DEBUG = False
+DEBUG = True
 
 # environment variable containing name of Pcloud admin secret in ASM
 PCLOUD_ADMIN_SECRET_ENV_VAR = "PrivilegeCloudSecret"
@@ -35,34 +35,38 @@ def prologOut(event, context):
 
 
 # -------------------------------------------
-def validateSecretTags(secrets_manager_client, secret_id):
+def validateSecretMetadata(secrets_manager_client, secret_id):
     # Validate secret is tagged w/ 'Sourced by CyberArk' - if not, flag as not found
-    # returns dictionary of secret tags, status_code & response_body message
+    # returns dictionary of secret metadata, status_code & response_body message
 
-    tags_dict = {}
+    secmeta_dict = {}
     status_code = 200
-    response_body = f"Secret {secret_id} sourced by CyberArk"
+    response_body = f"Secret {secret_id} is sourced by CyberArk"
 
     # Retrieve tags of the secret
     try:
         response = secrets_manager_client.describe_secret(SecretId=secret_id)
     except ClientError as e:
         status_code = 500
-        response_body = json.dumps(f"Error retrieving tags for secret: {e}")
+        response_body = json.dumps(f"Error getting description for secret: {e}")
     else:
         tags = response.get("Tags", [])
-        tags_dict = {tag["Key"]: tag["Value"] for tag in tags}
+        secmeta_dict = {tag["Key"]: tag["Value"] for tag in tags}
 
-        if "Sourced by CyberArk" not in tags_dict:
+        if "Sourced by CyberArk" not in secmeta_dict:
             status_code = 404
             response_body = f"Secret {secret_id} not sourced by CyberArk"
+        else:
+            # parse secret ARN for account # & region ID
+            secmeta_dict["AWS Account"] = response.get("ARN").split(":")[4]
+            secmeta_dict["AWS Region"] = response.get("ARN").split(":")[3]
 
     if DEBUG:
         print("================ validateSecretTags() ================")
-        print(f"\tsecret_id: {secret_id}\n\ttags_dict: {tags_dict}")
+        print(f"\tsecret_id: {secret_id}\n\tsecmeta_dict: {secmeta_dict}")
         print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
 
-    return tags_dict, status_code, response_body
+    return secmeta_dict, status_code, response_body
 
 
 # -------------------------------------------
@@ -116,92 +120,24 @@ def getAsmSecretValue(secrets_manager_client, secret_id):
 
 
 # -------------------------------------------
-def authnCyberArk(cyberark_dict):
-    # uses Pcloud creds in cyberark_dict to authenticate to CyberArk Identity
-    # returns session_token to use in further CyberArk API calls
-
-    session_token = None
-    status_code = 200
-    response_body = "Successfully authenticated to CyberArk Privilege Cloud."
-
-    # Authenticate to CyberArk Identity
-    url = f"https://{cyberark_dict['subdomain']}.cyberark.cloud/api/idadmin/oauth2/platformtoken"
-    payload = f"grant_type=client_credentials&client_id={urlify(cyberark_dict['svc_username'])}&client_secret={urlify(cyberark_dict['svc_password'])}"
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-    response = requests.request("POST", url, headers=headers, data=payload, timeout=60)
-    if response.status_code == 200:
-        # Parse the JSON response into a dictionary
-        data = response.json()
-        # Extract session token from the response dict
-        session_token = data.get("access_token", None)
-        if session_token is None:
-            status_code = 401
-            response_body = json.dumps(
-                f"There was a problem authenticating to: {cyberark_dict['subdomain']}.privilegecloud.cyberark.cloud"
-            )
-    else:
-        status_code = 500
-        response_body = json.dumps(
-            f"There was a problem authenticating to: {cyberark_dict['subdomain']}.privilegecloud.cyberark.cloud"
-        )
-
-    if DEBUG:
-        print("================ authnCyberark() ================")
-        print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
-
-    return session_token, status_code, response_body
-
-# -------------------------------------------
-def createSafe(cyberark_dict, session_token):
-    # Uses info in dictionary to create a safe in Privilege Cloude
-    # returns status_code == 201 on success with response_body message
-
-    status_code = 201
-    response_body = f"Safe {cyberark_dict['safe']} created successfully"
-
-    url = f"https://{cyberark_dict['subdomain']}.privilegecloud.cyberark.cloud/passwordvault/api/safes"
-    payload = json.dumps(
-        {
-            "safeName": cyberark_dict["safe"],
-            "description": "Created by AWS Secrets Manager",
-            "olacEnabled": False,
-            "managingCPM": "PasswordManager",
-            "numberOfDaysRetention": 0,
-        }
-    )
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {session_token}",
-    }
-    response = requests.request("POST", url, headers=headers, data=payload, timeout=30)
-    if response.status_code == 409:
-        status_code = 409
-        response_body = json.dumps(f"Safe {cyberark_dict['safe']} already exists")
-    else:
-        status_code = 500
-        response_body = response.text
-
-    if DEBUG:
-        print("================ createSafe() ================")
-        print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
-
-    return status_code, response_body
-
-# -------------------------------------------
-def assembleOnboardingDict(pcloud_secret_dict, tags_dict, secret_dict):
+def assembleOnboardingDict(admin_dict, secmeta_dict, secret_dict):
     #
     # returns onboarding dictionary, status_code & response_body message
 
     status_code = 200
     response_body = "Onboarding dictionary assembled successfully."
-    cyberark_dict = {
+    onboarding_dict = {
         # values pulled from service account secret
-        "subdomain": pcloud_secret_dict.get("subdomain", None),
-        "svc_username": pcloud_secret_dict.get("username", None),
-        "svc_password": pcloud_secret_dict.get("password", None),
-        # values pulled from secret tags - standard CyberArk properties
-        "safe": tags_dict.get("CyberArk Safe", None),
-        "account": tags_dict.get("CyberArk Account", None),
+        "subdomain": admin_dict.get("subdomain", None),
+        "svc_username": admin_dict.get("username", None),
+        "svc_password": admin_dict.get("password", None),
+        "awsShRoleName": admin_dict.get("shRoleName", None),
+        "awsAccountAlias": admin_dict.get("accountAlias", None),
+        # values pulled from secret metadata
+        "awsAccount": secmeta_dict.get("AWS Account", None),
+        "awsRegion": secmeta_dict.get("AWS Region", None),
+        "safe": secmeta_dict.get("CyberArk Safe", None),
+        "account": secmeta_dict.get("CyberArk Account", None),
         # values pulled from RDS secret value - standard CyberArk properties
         "address": secret_dict.get("address", None),
         "username": secret_dict.get("username", None),
@@ -215,52 +151,129 @@ def assembleOnboardingDict(pcloud_secret_dict, tags_dict, secret_dict):
     }
 
     # If no address, get secret value for 'host', if any
-    if cyberark_dict["address"] is None:
-        cyberark_dict["address"] = secret_dict.get("host", None)
+    if onboarding_dict["address"] is None:
+        onboarding_dict["address"] = secret_dict.get("host", None)
 
     # If no platformId, get value for 'CyberArk Platform' tag, if any
-    if cyberark_dict["platformId"] is None:
-        cyberark_dict["platformId"] = tags_dict.get("CyberArk Platform", None)
+    if onboarding_dict["platformId"] is None:
+        onboarding_dict["platformId"] = secmeta_dict.get("CyberArk Platform", None)
 
     # Validate no keys contain None as a value, if any, exit w/ 404
-    none_keys = [key for key, value in cyberark_dict.items() if value is None]
+    none_keys = [key for key, value in onboarding_dict.items() if value is None]
     if none_keys:
         status_code = 404
         response_body = json.dumps(f"Required key value(s) not found: {none_keys}")
 
     if DEBUG:
         print("================ assembleOnboardingDict() ================")
-        print(f"\ncyberark_dict: {cyberark_dict}")
+        print(f"\nonboarding_dict: {onboarding_dict}")
         print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
 
-    return cyberark_dict, status_code, response_body
+    return onboarding_dict, status_code, response_body
+
 
 # -------------------------------------------
-def onboardAccount(cyberark_dict, session_token):
-    # uses values in cyberark_dict to create account
+def authnCyberArk(onboarding_dict):
+    # uses Pcloud creds in onboarding_dict to authenticate to CyberArk Identity
+    # returns session_token (CyberArk Identity JWT) to use in further CyberArk API calls
+
+    session_token = None
+    status_code = 200
+    response_body = "Successfully authenticated to CyberArk Privilege Cloud."
+
+    # Authenticate to CyberArk Identity
+    url = f"https://{onboarding_dict['subdomain']}.cyberark.cloud/api/idadmin/oauth2/platformtoken"
+    payload = f"grant_type=client_credentials&client_id={urlify(onboarding_dict['svc_username'])}&client_secret={urlify(onboarding_dict['svc_password'])}"
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+    response = requests.request("POST", url, headers=headers, data=payload)
+    if response.status_code == 200:
+        # Parse the JSON response into a dictionary
+        data = response.json()
+        # Extract session token from the response dict
+        session_token = data.get("access_token", None)
+        if session_token is None:
+            status_code = 401
+            response_body = json.dumps(
+                f"There was a problem authenticating to: {onboarding_dict['subdomain']}.privilegecloud.cyberark.cloud"
+            )
+    else:
+        status_code = 500
+        response_body = json.dumps(
+            f"There was a problem authenticating to: {onboarding_dict['subdomain']}.privilegecloud.cyberark.cloud"
+        )
+
+    if DEBUG:
+        print("================ authnCyberark() ================")
+        print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
+
+    return session_token, status_code, response_body
+
+
+# -------------------------------------------
+def createSafe(onboarding_dict, session_token):
+    # Uses info in dictionary to create a safe in Privilege Cloude
+    # returns status_code == 201 on success with response_body message
+
+    status_code = 201
+    response_body = f"Safe {onboarding_dict['safe']} created successfully"
+
+    url = f"https://{onboarding_dict['subdomain']}.privilegecloud.cyberark.cloud/passwordvault/api/safes"
+    payload = json.dumps(
+        {
+            "safeName": onboarding_dict["safe"],
+            "description": "Created by AWS Secrets Manager",
+            "olacEnabled": False,
+            "managingCPM": "PasswordManager",
+            "numberOfDaysRetention": 0,
+        }
+    )
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {session_token}",
+    }
+    response = requests.request(
+        "POST", url, headers=headers, data=payload
+    )  # timeout is governed by lambda config
+    if response.status_code == 409:
+        status_code = 409
+        response_body = json.dumps(f"Safe {onboarding_dict['safe']} already exists")
+    else:
+        status_code = 500
+        response_body = response.text
+
+    if DEBUG:
+        print("================ createSafe() ================")
+        print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
+
+    return status_code, response_body
+
+
+# -------------------------------------------
+def onboardAccount(onboarding_dict, session_token):
+    # uses values in onboarding_dict to create account
     # returns status_code == 201 for success, response_body with message
 
     status_code = 201
     response_body = json.dumps(
-        f"Account {cyberark_dict['account']} onboarded successfully"
+        f"Account {onboarding_dict['account']} onboarded successfully"
     )
 
-    url = f"https://{cyberark_dict['subdomain']}.privilegecloud.cyberark.cloud/passwordvault/api/accounts"
+    url = f"https://{onboarding_dict['subdomain']}.privilegecloud.cyberark.cloud/passwordvault/api/accounts"
     payload = json.dumps(
         {
-            "safeName": cyberark_dict["safe"],
-            "platformID": cyberark_dict["platformId"],
-            "name": cyberark_dict["account"],
-            "address": cyberark_dict["address"],
-            "userName": cyberark_dict["username"],
+            "safeName": onboarding_dict["safe"],
+            "platformID": onboarding_dict["platformId"],
+            "name": onboarding_dict["account"],
+            "address": onboarding_dict["address"],
+            "userName": onboarding_dict["username"],
             "secretType": "password",
-            "secret": cyberark_dict["password"],
+            "secret": onboarding_dict["password"],
             "secretManagement": {"automaticManagementEnabled": True},
             "platformAccountProperties": {
-                "port": cyberark_dict["port"],
-                "host": cyberark_dict["host"],
-                "dbInstanceIdentifier": cyberark_dict["dbInstanceIdentifier"],
-                "engine": cyberark_dict["engine"],
+                "port": onboarding_dict["port"],
+                "host": onboarding_dict["host"],
+                "dbInstanceIdentifier": onboarding_dict["dbInstanceIdentifier"],
+                "engine": onboarding_dict["engine"],
             },
         }
     )
@@ -271,7 +284,9 @@ def onboardAccount(cyberark_dict, session_token):
     response = requests.request("POST", url, headers=headers, data=payload, timeout=30)
     if response.status_code == 409:
         status_code = 409
-        response_body = json.dumps(f"Account {cyberark_dict['account']} already exists")
+        response_body = json.dumps(
+            f"Account {onboarding_dict['account']} already exists"
+        )
     else:
         status_code = 500
         response_body = json.dumps(f"{response.text}")
@@ -283,9 +298,309 @@ def onboardAccount(cyberark_dict, session_token):
 
     return status_code, response_body
 
+
+# -------------------------------------------
+def getSHSourceStoreId(onboarding_dict, session_token):
+    # Exactly one source store must already exist.
+    # Uses values in onboarding_dict to retrieve source store ID from Secrets Hub
+    # Returns ID, status_code == 200 for success, response_body with message
+
+    sstore_id = ""
+    status_code = 200
+    response_body = "Source store retrieved successfully"
+
+    url = f"https://{onboarding_dict['subdomain']}.secretshub.cyberark.cloud/api/secret-stores"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {session_token}",
+    }
+    response = requests.request("GET", url, headers=headers)
+    status_code = response.status_code
+    if status_code == 200:
+        stores_dict = json.loads(response.text)
+        isSource = lambda x: "SECRETS_SOURCE" in x["behaviors"]
+        foundSource = [a for a in stores_dict["secretStores"] if isSource(a)]
+        if len(foundSource) == 0:
+            status_code = 403
+            response_body = "No secret source found."
+        elif len(foundSource) > 1:
+            status_code = 300
+            response_body = "More than one secret source found."
+        else:
+            sstore_id = foundSource.pop()["id"]
+    else:
+        response_body = response.text
+
+    if DEBUG:
+        print("================ getSHSourceStoreId() ================")
+        print(f"\tsstore_id: {sstore_id}")
+        print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
+
+    return sstore_id, status_code, response_body
+
+
+# -------------------------------------------
+def getSHFilterForSafe(onboarding_dict, session_token, store_id):
+    # Does not assume filter exists in Secrets Hub.
+    # Uses store_id and safename from dict to find policy filter for safe.
+    # If filter doesn't exist, creates it.
+    # Returns filter_id, status_code == 200 or 201 for success, response_body with message
+
+    # -------------------------------------------
+    def createSHFilterForSafe(onboarding_dict, session_token, store_id, safe_name):
+        url = f"https://{onboarding_dict['subdomain']}.secretshub.cyberark.cloud/api/secret-stores{store_id}/filters"
+        payload = json.dumps({"data": {"safeName": safe_name}, "type": "PAM_SAFE"})
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {session_token}",
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+        status_code = response.status_code
+        if status_code == 201:
+            filter_dict = json.loads(response.text)
+            filter_id = filter_dict["id"]
+            response_body = (
+                f"Filter for store ID {store_id} and safe {safe_name} created."
+            )
+        else:
+            status_code = response.status_code
+            response_body = response.text
+
+        if DEBUG:
+            print("================ createSHFilterForSafe() ================")
+            print(f"\tfilter_id: {filter_id}")
+            print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
+
+        return filter_id, status_code, response_body
+
+    # -------------------------------------------
+
+    filter_id = ""
+    status_code = 0
+    safe_name = onboarding_dict["safe"]
+    response_body = f"Source store filter for store ID {store_id} and safe {safe_name} retrieved successfully."
+
+    # get all filters
+    url = f"https://{onboarding_dict['subdomain']}.secretshub.cyberark.cloud/api/secret-stores/{store_id}/filters"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {session_token}",
+    }
+    response = requests.request("GET", url, headers=headers)
+    status_code = response.status_code
+    if status_code == 200:
+        # see if filter already exists for safe
+        filters_dict = json.loads(response.text)
+        isFilter = lambda x: (
+            (x["type"] == "PAM_SAFE") & (x["data"]["safeName"] == safe_name)
+        )
+        foundFilter = [a for a in filters_dict["filters"] if isFilter(a)]
+        if len(foundFilter) == 0:  # filter does not exist - create it
+            filter_id, status_code, response_body = createSHFilterForSafe(
+                onboarding_dict, session_token, store_id, safe_name
+            )
+        elif len(foundFilter) == 1:  # filter already exists - use it
+            filter_id = foundFilter.pop()["id"]
+        else:  # more than one filter exists - ambiguous
+            status_code = 300
+            response_body = f"More than one filter already exists for store ID {store_id} and safe {safe_name}."
+
+    else:
+        response_body = response.text
+
+    if DEBUG:
+        print("================ getSHFilterForSafe() ================")
+        print(f"\tfilter_id: {filter_id}")
+        print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
+
+    return filter_id, status_code, response_body
+
+
+# -------------------------------------------
+def getSHTargetStoreId(onboarding_dict, session_token):
+    # Does not assume target store exists in Secrets Hub.
+    # Uses account and region ID from dict to find existing target store.
+    # If store doesn't exist it creates it.
+    # Returns tstore_id, status_code == 200 or 201 for success, response_body with message
+
+    # -------------------------------------------
+    def createSHTargetStore(onboarding_dict, session_token):
+        url = f"https://{onboarding_dict['subdomain']}.secretshub.cyberark.cloud/api/secret-stores"
+        account_id = onboarding_dict["awsAccount"]
+        account_alias = onboarding_dict["awsAccountAlias"]
+        region_id = onboarding_dict["awsAccount"]
+        role_name = onboarding_dict["awsShRoleName"]
+        payload = json.dumps(
+            {
+                "type": "AWS_ASM",
+                "data": {
+                    "accountAlias": account_alias,
+                    "accountId": account_id,
+                    "regionId": region_id,
+                    "roleName": role_name,
+                },
+                "description": "Auto-created by onboarding lambda",
+                "name": "ASM target store: " + account_alias + region_id,
+            }
+        )
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {session_token}",
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+        status_code = response.status_code
+        if status_code == 201:
+            tstore_dict = json.loads(response.text)
+            tstore_id = tstore_dict["id"]
+            response_body = f"Target store with store ID {tstore_id} created."
+        else:
+            response_body = response.text
+
+        if DEBUG:
+            print("================ createSHTargetStore() ================")
+            print(f"\ttstore_id: {tstore_id}")
+            print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
+
+        return tstore_id, status_code, response_body
+
+    # -------------------------------------------
+
+    tstore_id = ""
+    status_code = 200
+    response_body = "Target store retrieved successfully"
+
+    url = f"https://{onboarding_dict['subdomain']}.secretshub.cyberark.cloud/api/secret-stores"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {session_token}",
+    }
+    response = requests.request("GET", url, headers=headers)
+    status_code = response.status_code
+    if status_code == 200:
+        stores_dict = json.loads(response.text)
+        account_id = onboarding_dict["awsAccount"]
+        region_id = onboarding_dict["awsRegion"]
+        # filter out Source & non-AWS stores because they don't have entries for AWS account/region
+        isAwsTarget = lambda x: (
+            (x["type"] == "AWS_ASM") & ("SECRETS_TARGET" in x["behaviors"])
+        )
+        allTargets = [t for t in stores_dict["secretStores"] if isAwsTarget(t)]
+        isTheTarget = lambda x: (
+            (x["data"]["accountId"] == account_id)
+            & (x["data"]["regionId"] == region_id)
+        )
+        foundTarget = [a for a in allTargets if isTheTarget(a)]
+        if len(foundTarget) == 0:  # target store not found - create it
+            tstore_id, status_code, response_body = createSHTargetStore(
+                onboarding_dict, session_token
+            )
+        elif len(foundTarget) > 1:
+            status_code = 300
+            response_body = "More than one target store found."
+        else:
+            tstore_id = foundTarget.pop()["id"]
+    else:
+        response_body = response.text
+
+    if DEBUG:
+        print("================ getSHTargetStoreId() ================")
+        print(f"\ttstore_id: {tstore_id}")
+        print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
+
+    return tstore_id, status_code, response_body
+
+
+# -------------------------------------------
+def getSHSyncPolicy(onboarding_dict, session_token, sstore_id, tstore_id, filter_id):
+    # Does not assume sync policy exists in Secrets Hub.
+    # Uses IDs from dict to find existing policy.
+    # If policy not fount, creates it.
+    # Returns policy_id, status_code == 200 or 201 for success, response_body with message
+
+    # -------------------------------------------
+    def createSHSyncPolicy(
+        onboarding_dict, session_token, sstore_id, tstore_id, filter_id
+    ):
+        # should probably get source, target, filter names for policy name/description
+        url = f"https://{onboarding_dict['subdomain']}.secretshub.cyberark.cloud/api/policies"
+        payload = json.dumps(
+            {
+                "name": "ASM policy",
+                "description": "Auto-created by onboarding lambda",
+                "source": {"id": sstore_id},
+                "target": {"id": tstore_id},
+                "filter": {"id": filter_id},
+            }
+        )
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {session_token}",
+        }
+        response = requests.request("POST", url, headers=headers, data=payload)
+        status_code = response.status_code
+        if status_code == 201:
+            policy_dict = json.loads(response.text)
+            policy_id = policy_dict["id"]
+            response_body = f"Policy with source ID {sstore_id}, target ID {tstore_id}, filter ID {filter_id} created."
+        else:
+            status_code = response.status_code
+            response_body = response.text
+
+        if DEBUG:
+            print("================ createSHSyncPolicy() ================")
+            print(f"\tpolicy_id: {policy_id}")
+            print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
+
+        return policy_id, status_code, response_body
+
+    # -------------------------------------------
+
+    policy_id = ""
+    status_code = 200
+    response_body = "Target store retrieved successfully"
+
+    url = (
+        f"https://{onboarding_dict['subdomain']}.secretshub.cyberark.cloud/api/policies"
+    )
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {session_token}",
+    }
+    response = requests.request("GET", url, headers=headers)
+    status_code = response.status_code
+    if status_code == 200:
+        policies_dict = json.loads(response.text)
+        isPolicy = lambda x: (
+            (x["state"]["current"] == "ENABLED")
+            & (x["source"]["id"] == sstore_id)
+            & (x["target"]["id"] == tstore_id)
+            & (x["filter"]["id"] == filter_id)
+        )
+        foundPolicy = [a for a in policies_dict["policies"] if isPolicy(a)]
+        if len(foundPolicy) == 0:  # policy not found - create it
+            policy_id, status_code, response_body = createSHSyncPolicy(
+                onboarding_dict, session_token, sstore_id, tstore_id, filter_id
+            )
+        elif len(foundPolicy) > 1:
+            status_code = 300
+            response_body = "More than one sync policy found for source ID {sstore_id}, filter ID {filter_id}, target ID {tstore_id}."
+        else:
+            policy_id = foundPolicy.pop()["id"]
+    else:
+        response_body = response.text
+
+    if DEBUG:
+        print("================ getSHSyncPolicy() ================")
+        print(f"\tpolicy_id: {policy_id}")
+        print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
+
+    return policy_id, status_code, response_body
+
+
 ##########################################################################################
 # Lambda function handler (main entrypoint)
 ##########################################################################################
+
 
 def lambda_handler(event, context):
     prologOut(event, context)
@@ -297,7 +612,7 @@ def lambda_handler(event, context):
     secrets_manager_client = boto3.client("secretsmanager")
 
     # Validate secret is correctly tagged for onboarding
-    tags_dict, status_code, response_body = validateSecretTags(
+    secmeta_dict, status_code, response_body = validateSecretMetadata(
         secrets_manager_client, secret_id
     )
     if status_code != 200:
@@ -309,8 +624,11 @@ def lambda_handler(event, context):
         response_body = f"Env var '{PCLOUD_ADMIN_SECRET_ENV_VAR}' not found in lambda environment variables."
         return {"statusCode": 404, "body": response_body}
 
-    # Get Pcloud admin creds from ASM
-    pcloud_secret_dict, status_code, response_body = getAsmSecretValue(
+    # Get admin creds from ASM - secret holds:
+    # - subdomain - subdomain of tenant URL, e.g. https://<subdomain>.cyberark.cloud/...
+    # - username/password - login credentials of CyberArk Oauth2 service user identity
+    # - shRoleName - name of Secrets Hub role for tenant
+    admin_dict, status_code, response_body = getAsmSecretValue(
         secrets_manager_client, pcloud_secret_id
     )
     if status_code != 200:
@@ -325,7 +643,7 @@ def lambda_handler(event, context):
 
     # Assemble all info into a single onboarding dictionary
     onboarding_dict, status_code, response_body = assembleOnboardingDict(
-        pcloud_secret_dict, tags_dict, secret_dict
+        admin_dict, secmeta_dict, secret_dict
     )
     if status_code != 200:
         return {"statusCode": status_code, "body": response_body}
@@ -335,14 +653,46 @@ def lambda_handler(event, context):
     if status_code != 200:
         return {"statusCode": status_code, "body": response_body}
 
+    """ Skip safe creation for now
     # Create safe in Privilege Cloud
     status_code, response_body = createSafe(onboarding_dict, session_token)
     if status_code != 201:
         return {"statusCode": status_code, "body": response_body}
+    """
 
     # Onboard account into safe
     status_code, response_body = onboardAccount(onboarding_dict, session_token)
+    # !! DEBUG TEST !!
+    status_code = 201
     if status_code != 201:
+        return {"statusCode": status_code, "body": response_body}
+
+    # Get Secrets Hub source store ID
+    sstore_id, status_code, response_body = getSHSourceStoreId(
+        onboarding_dict, session_token
+    )
+    if status_code != 200:
+        return {"statusCode": status_code, "body": response_body}
+
+    # Get filter for Safe (returns existing if found, creates if not found)
+    filter_id, status_code, response_body = getSHFilterForSafe(
+        onboarding_dict, session_token, sstore_id
+    )
+    if status_code not in [200, 201]:
+        return {"statusCode": status_code, "body": response_body}
+
+    # Get Secrets Hub target store ID
+    tstore_id, status_code, response_body = getSHTargetStoreId(
+        onboarding_dict, session_token
+    )
+    if status_code not in [200, 201]:
+        return {"statusCode": status_code, "body": response_body}
+
+    # Create sync policy linking Source to Target (checks for duplicates, returns existing if found)
+    policy_id, status_code, response_body = getSHSyncPolicy(
+        onboarding_dict, session_token, sstore_id, tstore_id, filter_id
+    )
+    if status_code not in [200, 201]:
         return {"statusCode": status_code, "body": response_body}
 
     return {"statusCode": 200, "body": f"Secret {secret_id} onboarded successfully."}

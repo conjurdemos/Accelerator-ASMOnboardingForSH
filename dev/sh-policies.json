@@ -1,0 +1,532 @@
+{
+  "count": 26,
+  "policies": [
+    {
+      "id": "policy-04ebf8a4-ca02-408b-b4d8-8e453455a4d9",
+      "name": "aslanramos-sa-east-1",
+      "description": "Aslan Ramos - SA-EAST-1",
+      "createdAt": "2022-10-05T15:43:45.677000+00:00",
+      "updatedAt": "2022-10-05T15:43:45.677000+00:00",
+      "createdBy": "aslan_ramos@cyberark.cloud.3357",
+      "updatedBy": "aslan_ramos@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-a0ef8f83-be96-4780-9988-b1d6a292b92e"
+      },
+      "filter": {
+        "id": "filter-aafaf176-ce0e-4774-a62a-2d03be05b922"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-1bc7ac2b-30ab-4fee-8a4d-88690ec71d2a",
+      "name": "syncAWS",
+      "createdAt": "2023-10-17T22:38:00.216000+00:00",
+      "updatedAt": "2023-10-17T22:38:00.216000+00:00",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-a0de2fe2-05b3-4d9d-b45b-a7409c2ad664"
+      },
+      "filter": {
+        "id": "filter-f779b2c9-f569-4351-9869-2995f44ce657"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-1dd3383c-a8fa-47d0-b621-1feebe981960",
+      "name": "cau-aws-us-east-1-app02 ",
+      "description": "CyberArk University Secrets Hub Test for app02 ",
+      "createdAt": "2022-12-11T07:54:31.452000+00:00",
+      "updatedAt": "2023-06-27T03:10:45.586000+00:00",
+      "createdBy": "sean_payne@cyberark.cloud.3357",
+      "updatedBy": "sean_payne@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-11b46279-3ee2-4747-bff1-1a3f0a4eeafe"
+      },
+      "filter": {
+        "id": "filter-77d4fa36-a40b-4903-a798-8dc4a119901a"
+      },
+      "state": {
+        "current": "DISABLED"
+      }
+    },
+    {
+      "id": "policy-25d641e0-739f-451c-ac3d-8454d62221fe",
+      "name": "prodSync",
+      "createdAt": "2023-04-28T16:35:14.603000+00:00",
+      "updatedAt": "2023-04-28T16:35:14.603000+00:00",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-f2ef5ef7-5599-46cd-9a02-bffa574862d4"
+      },
+      "filter": {
+        "id": "filter-f72a76fd-312c-41d9-bd34-3436caffda0f"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-26522dfd-3f57-4e0f-ada1-3c8059d279d8",
+      "name": "joeg-aws-lab",
+      "createdAt": "2022-08-18T20:55:56.947000+00:00",
+      "updatedAt": "2022-08-18T20:55:56.947000+00:00",
+      "createdBy": "joe_garcia@cyberark.cloud.3357",
+      "updatedBy": "joe_garcia@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-0d33bc55-c9cd-432d-a9dc-5cf9e049b888"
+      },
+      "filter": {
+        "id": "filter-15961f0e-620b-49f1-8229-d84bc0c69d2f"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-2e7fad4f-2400-49b6-b2cc-d004bc431e86",
+      "name": "syncOhioRegion",
+      "createdAt": "2023-07-11T20:49:31.263000+00:00",
+      "updatedAt": "2023-07-11T20:49:31.263000+00:00",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-08181497-b41c-40c3-b1be-ca72a15153f0"
+      },
+      "filter": {
+        "id": "filter-94290482-a42c-49dc-8b04-c6268bd692c3"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-2f370352-8db4-49fa-81fe-3016515e2b12",
+      "name": "AWS_GKO",
+      "createdAt": "2022-12-13T18:29:20.263000+00:00",
+      "updatedAt": "2022-12-13T18:29:20.263000+00:00",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-f2ef5ef7-5599-46cd-9a02-bffa574862d4"
+      },
+      "filter": {
+        "id": "filter-b72ee25f-4c70-4eab-9c2a-78f8f0f60ac9"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-42364218-29d6-48f9-aa9c-fcb37d724641",
+      "name": "cau-ap-southeast-1-app04",
+      "description": "CyberArk University Secrets Hub Test for app04",
+      "createdAt": "2023-03-15T07:03:28.045000+00:00",
+      "updatedAt": "2023-06-26T01:24:13.495000+00:00",
+      "createdBy": "sean_payne@cyberark.cloud.3357",
+      "updatedBy": "sean_payne@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-bfa2c082-1e8b-4cbb-aa1d-c196fdd904b8"
+      },
+      "filter": {
+        "id": "filter-0e03cbb1-2ebb-46b9-bc99-c9c1b65d3522"
+      },
+      "state": {
+        "current": "DISABLED"
+      }
+    },
+    {
+      "id": "policy-4323258a-1900-4341-9298-3458f9430604",
+      "name": "sync aws sh",
+      "createdAt": "2022-08-09T12:27:32.089000+00:00",
+      "updatedAt": "2022-08-09T12:27:32.089000+00:00",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-f2ef5ef7-5599-46cd-9a02-bffa574862d4"
+      },
+      "filter": {
+        "id": "filter-419a2da5-758a-4a08-909e-e93258b68300"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-480ca514-9679-4176-a973-4a777b3e207f",
+      "name": "jpatt-us-east-1",
+      "createdAt": "2022-08-29T14:17:50.434000+00:00",
+      "updatedAt": "2023-11-21T18:10:16.206000+00:00",
+      "createdBy": "jeremy_patton@cyberark.cloud.3357",
+      "updatedBy": "jeremy_patton@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-267df65b-a40f-49d6-8365-df6e16503469"
+      },
+      "filter": {
+        "id": "filter-adb76ada-2550-42f3-98e8-10f61ea86924"
+      },
+      "state": {
+        "current": "DISABLED"
+      }
+    },
+    {
+      "id": "policy-56e6124d-2cc6-461c-929c-9e0087ec1d15",
+      "name": "dk-sh-secure-apps",
+      "description": "Secrets Hub demo for AWS secure Apps. ",
+      "createdAt": "2022-09-13T15:52:19.489000+00:00",
+      "updatedAt": "2022-09-13T15:52:19.489000+00:00",
+      "createdBy": "darren_khan@cyberark.cloud.3357",
+      "updatedBy": "darren_khan@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-0ab13701-0b99-4c6a-901c-819983692c0a"
+      },
+      "filter": {
+        "id": "filter-f74647ec-2d68-4f37-960c-2eac1c0d71da"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-5d20dfc3-e027-47b5-9d6b-b593a2a865ee",
+      "name": "jpat-us-west-2-sync-policy",
+      "createdAt": "2022-08-22T14:47:20.535000+00:00",
+      "updatedAt": "2023-11-21T18:10:06.219000+00:00",
+      "createdBy": "jeremy_patton@cyberark.cloud.3357",
+      "updatedBy": "jeremy_patton@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-131e3da4-f62b-4d61-99dd-6778fc754b6d"
+      },
+      "filter": {
+        "id": "filter-9d5432bc-6bf5-4ccf-8c03-1236d57637eb"
+      },
+      "state": {
+        "current": "DISABLED"
+      }
+    },
+    {
+      "id": "policy-663716eb-6674-4fd1-8b2d-fa7fffb668a7",
+      "name": "Azure Test",
+      "createdAt": "2023-06-02T18:53:54.574000+00:00",
+      "updatedAt": "2023-06-02T18:53:54.574000+00:00",
+      "createdBy": "evan_litwak@cyberark.cloud.3357",
+      "updatedBy": "evan_litwak@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-21c60c65-7fea-4949-b811-9e1e96ef4e3f"
+      },
+      "filter": {
+        "id": "filter-b285f280-2cbd-4532-a662-1408f5653b94"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-6e28b0ac-eff4-4a6d-aae9-f9d6b9502561",
+      "name": "gkotoOrg",
+      "createdAt": "2023-08-30T19:45:15.417000+00:00",
+      "updatedAt": "2023-08-30T19:45:15.417000+00:00",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-d6afd51f-8a24-4224-b882-8d2b6553f3a1"
+      },
+      "filter": {
+        "id": "filter-b3db0f09-f74c-4d1f-abfc-4f2b4ed9840f"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-7579af18-3dda-46ae-b2a5-90c9626a1f7f",
+      "name": "JodyTest-ca-central-1",
+      "createdAt": "2022-08-22T22:01:44.277000+00:00",
+      "updatedAt": "2023-08-08T16:16:29.633000+00:00",
+      "createdBy": "jody_hunt@cyberark.cloud.3357",
+      "updatedBy": "jody_bot@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-344a8ac1-3b1e-4275-960d-76a5b75b08f9"
+      },
+      "filter": {
+        "id": "filter-301340a1-8af0-4da4-b938-1034639038aa"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-7e5ca6d4-457a-4be3-8e98-d8b7ee3b730e",
+      "name": "awesomewebinar",
+      "createdAt": "2022-09-06T16:57:24.653000+00:00",
+      "updatedAt": "2022-09-06T16:57:24.653000+00:00",
+      "createdBy": "joe_garcia@cyberark.cloud.3357",
+      "updatedBy": "joe_garcia@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-27425de0-200e-42e2-a264-f481d95a8dee"
+      },
+      "filter": {
+        "id": "filter-8f97b7ca-74c9-492e-a0ed-c06a51eefed0"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-88085878-1032-4f62-ba1d-c635c3f2a877",
+      "name": "syncSB",
+      "createdAt": "2023-10-04T17:11:02.151000+00:00",
+      "updatedAt": "2023-10-04T17:11:02.151000+00:00",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-08181497-b41c-40c3-b1be-ca72a15153f0"
+      },
+      "filter": {
+        "id": "filter-f63fe1f3-1703-404a-8af0-38ca5ab8340b"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-915df2f5-f5eb-4201-9e74-5ac0892a76bd",
+      "name": "dam-db-safe-to-niwot",
+      "description": "Synch dam-db-safe to niwot-us-west-1",
+      "createdAt": "2022-09-01T19:15:52.796000+00:00",
+      "updatedAt": "2022-09-01T19:15:52.796000+00:00",
+      "createdBy": "dennis_mastin@cyberark.cloud.3357",
+      "updatedBy": "dennis_mastin@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-2b41a4a9-d934-4315-b09f-95b1a0315dd1"
+      },
+      "filter": {
+        "id": "filter-e8489916-b96a-4f38-8e94-3ff0b6907722"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-982261aa-eff8-46c7-8c2b-bc4775870b4d",
+      "name": "cau-aws-us-east-1-app01",
+      "description": "CyberArk University Secrets Hub Test for app01",
+      "createdAt": "2022-10-03T19:52:10.926000+00:00",
+      "updatedAt": "2023-06-27T03:10:30.215000+00:00",
+      "createdBy": "sean_payne@cyberark.cloud.3357",
+      "updatedBy": "sean_payne@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-11b46279-3ee2-4747-bff1-1a3f0a4eeafe"
+      },
+      "filter": {
+        "id": "filter-da11cc75-0667-4e74-b45c-c2d67dd1c567"
+      },
+      "state": {
+        "current": "DISABLED"
+      }
+    },
+    {
+      "id": "policy-9d1f0a64-2f17-44bf-ae8f-499cb159bb3e",
+      "name": "connecttoteam1",
+      "createdAt": "2023-11-28T16:55:19.381000+00:00",
+      "updatedAt": "2023-11-28T16:55:19.381000+00:00",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-d6afd51f-8a24-4224-b882-8d2b6553f3a1"
+      },
+      "filter": {
+        "id": "filter-924667c2-1bbf-4c7d-93ff-0c848f8d92d7"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-a0995198-41e9-424b-b58b-02bba5b9f8ce",
+      "name": "EL-sync-test",
+      "createdAt": "2023-06-02T19:14:58.630000+00:00",
+      "updatedAt": "2023-06-02T19:14:58.630000+00:00",
+      "createdBy": "evan_litwak@cyberark.cloud.3357",
+      "updatedBy": "evan_litwak@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-2c40a8fa-89f0-4e16-bdf9-bfff08c221a5"
+      },
+      "filter": {
+        "id": "filter-290fb2e2-637b-4d06-affb-f526910f940c"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-b37d9f83-5e21-4780-b531-2ecb638f0dc9",
+      "name": "dk-dev-databases",
+      "createdAt": "2022-08-09T17:51:35.641000+00:00",
+      "updatedAt": "2022-08-09T17:51:35.641000+00:00",
+      "createdBy": "darren_khan@cyberark.cloud.3357",
+      "updatedBy": "darren_khan@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-0ab13701-0b99-4c6a-901c-819983692c0a"
+      },
+      "filter": {
+        "id": "filter-29ed9537-5fd1-4a58-bcc8-f32ae39a74ed"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-cb3982e1-cfc4-4d1c-8325-59437aa7c7d6",
+      "name": "syncwithaws",
+      "createdAt": "2023-08-23T20:13:32.937000+00:00",
+      "updatedAt": "2023-08-23T20:13:32.937000+00:00",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-d6afd51f-8a24-4224-b882-8d2b6553f3a1"
+      },
+      "filter": {
+        "id": "filter-71b405b0-a2b7-4869-8b57-7dbcbff2d38e"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-d028dd7d-e68e-4a43-bdd4-23dd4a953e46",
+      "name": "prod-databases",
+      "createdAt": "2023-01-25T19:10:10.274000+00:00",
+      "updatedAt": "2023-01-25T19:10:10.274000+00:00",
+      "createdBy": "darren_khan@cyberark.cloud.3357",
+      "updatedBy": "darren_khan@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-9303f8b4-9031-4bb6-bfd6-9817ba0fbf3a"
+      },
+      "filter": {
+        "id": "filter-5fcd0150-ab15-4f2f-b646-7b39877c0c8e"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    },
+    {
+      "id": "policy-e2d8cac8-34cd-4642-8828-9b91fb44e3de",
+      "name": "cau-aws-southeast-1-app03",
+      "description": "CyberArk University Secrets Hub Test for app03",
+      "createdAt": "2023-03-15T03:40:51.873000+00:00",
+      "updatedAt": "2023-06-26T01:23:49.388000+00:00",
+      "createdBy": "sean_payne@cyberark.cloud.3357",
+      "updatedBy": "sean_payne@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-bfa2c082-1e8b-4cbb-aa1d-c196fdd904b8"
+      },
+      "filter": {
+        "id": "filter-58424fd6-a439-4f07-a74d-9085b388d7d0"
+      },
+      "state": {
+        "current": "DISABLED"
+      }
+    },
+    {
+      "id": "policy-eaac14a3-1278-4924-8609-003dc2134e84",
+      "name": "Proj",
+      "createdAt": "2023-05-11T20:16:40.002000+00:00",
+      "updatedAt": "2023-08-14T17:37:27.770000+00:00",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "jody_bot@cyberark.cloud.3357",
+      "source": {
+        "id": "store-aeaa2dd3-7d99-47aa-9989-49f56f9f987f"
+      },
+      "target": {
+        "id": "store-f2ef5ef7-5599-46cd-9a02-bffa574862d4"
+      },
+      "filter": {
+        "id": "filter-c5a3122f-2781-4070-9bb8-fd2fe8678c93"
+      },
+      "state": {
+        "current": "ENABLED"
+      }
+    }
+  ]
+}

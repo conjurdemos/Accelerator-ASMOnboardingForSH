@@ -1,0 +1,323 @@
+{
+  "filters": [
+    {
+      "id": "filter-f779b2c9-f569-4351-9869-2995f44ce657",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "awsworkshop"
+      },
+      "createdAt": "2023-10-17T22:37:57.067000",
+      "updatedAt": "2023-10-17T22:37:57.067000",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-f8a9fa8d-fd1a-4e1f-8b89-bd12d4e253c6",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "GKO"
+      },
+      "createdAt": "2023-07-11T20:19:26.092000",
+      "updatedAt": "2023-07-11T20:19:26.092000",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-419a2da5-758a-4a08-909e-e93258b68300",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "UA_safe"
+      },
+      "createdAt": "2022-08-09T12:27:26.055000",
+      "updatedAt": "2022-08-09T12:27:26.055000",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-bd200790-1b7f-48d1-9356-95c9144c34d1",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "SecretsHubTestSafe"
+      },
+      "createdAt": "2023-08-07T14:31:47.929000",
+      "updatedAt": "2023-08-07T14:31:47.929000",
+      "createdBy": "darren_khan@cyberark.cloud.3357",
+      "updatedBy": "darren_khan@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-adb76ada-2550-42f3-98e8-10f61ea86924",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "JPatt-us-east-1"
+      },
+      "createdAt": "2022-08-29T14:17:45.957000",
+      "updatedAt": "2022-08-29T14:17:45.957000",
+      "createdBy": "jeremy_patton@cyberark.cloud.3357",
+      "updatedBy": "jeremy_patton@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-f63fe1f3-1703-404a-8af0-38ca5ab8340b",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "SHAWSDB"
+      },
+      "createdAt": "2023-10-04T17:10:58.950000",
+      "updatedAt": "2023-10-04T17:10:58.950000",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-77d4fa36-a40b-4903-a798-8dc4a119901a",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "app-aws-cau-app02"
+      },
+      "createdAt": "2022-12-11T07:54:19.468000",
+      "updatedAt": "2022-12-11T07:54:19.468000",
+      "createdBy": "sean_payne@cyberark.cloud.3357",
+      "updatedBy": "sean_payne@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-58424fd6-a439-4f07-a74d-9085b388d7d0",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "app-aws-app03"
+      },
+      "createdAt": "2023-03-15T03:40:39.431000",
+      "updatedAt": "2023-03-15T03:40:39.431000",
+      "createdBy": "sean_payne@cyberark.cloud.3357",
+      "updatedBy": "sean_payne@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-0e03cbb1-2ebb-46b9-bc99-c9c1b65d3522",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "app-aws-app04"
+      },
+      "createdAt": "2023-03-15T07:03:14.097000",
+      "updatedAt": "2023-03-15T07:03:14.097000",
+      "createdBy": "sean_payne@cyberark.cloud.3357",
+      "updatedBy": "sean_payne@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-e8489916-b96a-4f38-8e94-3ff0b6907722",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "dam-db-safe"
+      },
+      "createdAt": "2022-09-01T19:15:46.589000",
+      "updatedAt": "2022-09-01T19:15:46.589000",
+      "createdBy": "dennis_mastin@cyberark.cloud.3357",
+      "updatedBy": "dennis_mastin@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-da11cc75-0667-4e74-b45c-c2d67dd1c567",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "app-aws-cau-app01"
+      },
+      "createdAt": "2022-10-03T19:52:04.866000",
+      "updatedAt": "2022-10-03T19:52:04.866000",
+      "createdBy": "sean_payne@cyberark.cloud.3357",
+      "updatedBy": "sean_payne@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-290fb2e2-637b-4d06-affb-f526910f940c",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "Evans-Safe"
+      },
+      "createdAt": "2023-06-02T19:14:43.013000",
+      "updatedAt": "2023-06-02T19:14:43.013000",
+      "createdBy": "evan_litwak@cyberark.cloud.3357",
+      "updatedBy": "evan_litwak@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-b3db0f09-f74c-4d1f-abfc-4f2b4ed9840f",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "GKO"
+      },
+      "createdAt": "2023-08-30T19:45:13.029000",
+      "updatedAt": "2023-08-30T19:45:13.029000",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-c5a3122f-2781-4070-9bb8-fd2fe8678c93",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "prod_proj1"
+      },
+      "createdAt": "2023-05-11T20:16:26.039000",
+      "updatedAt": "2023-05-11T20:16:26.039000",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-301340a1-8af0-4da4-b938-1034639038aa",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "JodyDemo"
+      },
+      "createdAt": "2022-08-22T22:01:38.762000",
+      "updatedAt": "2022-08-22T22:01:38.762000",
+      "createdBy": "jody_hunt@cyberark.cloud.3357",
+      "updatedBy": "jody_hunt@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-924667c2-1bbf-4c7d-93ff-0c848f8d92d7",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "team1"
+      },
+      "createdAt": "2023-11-28T16:55:18.105000",
+      "updatedAt": "2023-11-28T16:55:18.105000",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-5fcd0150-ab15-4f2f-b646-7b39877c0c8e",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "dk_prod_databases"
+      },
+      "createdAt": "2023-01-25T19:09:57.997000",
+      "updatedAt": "2023-01-25T19:09:57.997000",
+      "createdBy": "darren_khan@cyberark.cloud.3357",
+      "updatedBy": "darren_khan@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-9d5432bc-6bf5-4ccf-8c03-1236d57637eb",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "JPatt-us-west-2"
+      },
+      "createdAt": "2022-08-22T14:47:15.548000",
+      "updatedAt": "2022-08-22T14:47:15.548000",
+      "createdBy": "jeremy_patton@cyberark.cloud.3357",
+      "updatedBy": "jeremy_patton@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-aafaf176-ce0e-4774-a62a-2d03be05b922",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "aslan_devops"
+      },
+      "createdAt": "2022-10-05T15:43:40.703000",
+      "updatedAt": "2022-10-05T15:43:40.703000",
+      "createdBy": "aslan_ramos@cyberark.cloud.3357",
+      "updatedBy": "aslan_ramos@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-8f97b7ca-74c9-492e-a0ed-c06a51eefed0",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "SuperSecretWebinarSafe"
+      },
+      "createdAt": "2022-09-06T16:57:20.279000",
+      "updatedAt": "2022-09-06T16:57:20.279000",
+      "createdBy": "joe_garcia@cyberark.cloud.3357",
+      "updatedBy": "joe_garcia@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-29ed9537-5fd1-4a58-bcc8-f32ae39a74ed",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "dk_dev_databases"
+      },
+      "createdAt": "2022-08-09T17:51:30.306000",
+      "updatedAt": "2022-08-09T17:51:30.306000",
+      "createdBy": "darren_khan@cyberark.cloud.3357",
+      "updatedBy": "darren_khan@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-f72a76fd-312c-41d9-bd34-3436caffda0f",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "prod_proj1"
+      },
+      "createdAt": "2023-04-28T16:35:00.236000",
+      "updatedAt": "2023-04-28T16:35:00.236000",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-71b405b0-a2b7-4869-8b57-7dbcbff2d38e",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "awsworkshop"
+      },
+      "createdAt": "2023-08-23T20:13:31.070000",
+      "updatedAt": "2023-08-23T20:13:31.070000",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-f5e10f43-34fe-4f3e-80a3-ac7bbcee0dc8",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "Garnet_Demo"
+      },
+      "createdAt": "2022-09-06T13:00:41.012000",
+      "updatedAt": "2022-09-06T13:00:41.012000",
+      "createdBy": "garnet_merrill@cyberark.cloud.3357",
+      "updatedBy": "garnet_merrill@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-15961f0e-620b-49f1-8229-d84bc0c69d2f",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "JoeG-SecretsHub-Demo"
+      },
+      "createdAt": "2022-08-18T20:55:51.777000",
+      "updatedAt": "2022-08-18T20:55:51.777000",
+      "createdBy": "joe_garcia@cyberark.cloud.3357",
+      "updatedBy": "joe_garcia@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-f74647ec-2d68-4f37-960c-2eac1c0d71da",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "Secure-AWS-APPS"
+      },
+      "createdAt": "2022-09-13T15:52:14.757000",
+      "updatedAt": "2022-09-13T15:52:14.757000",
+      "createdBy": "darren_khan@cyberark.cloud.3357",
+      "updatedBy": "darren_khan@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-b72ee25f-4c70-4eab-9c2a-78f8f0f60ac9",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "GKO"
+      },
+      "createdAt": "2022-12-13T18:29:07.300000",
+      "updatedAt": "2022-12-13T18:29:07.300000",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-94290482-a42c-49dc-8b04-c6268bd692c3",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "GKO"
+      },
+      "createdAt": "2023-07-11T20:49:21.180000",
+      "updatedAt": "2023-07-11T20:49:21.180000",
+      "createdBy": "uzi_ailon@cyberark.cloud.3357",
+      "updatedBy": "uzi_ailon@cyberark.cloud.3357"
+    },
+    {
+      "id": "filter-b285f280-2cbd-4532-a662-1408f5653b94",
+      "type": "PAM_SAFE",
+      "data": {
+        "safeName": "Evans-Safe"
+      },
+      "createdAt": "2023-06-02T18:53:50.994000",
+      "updatedAt": "2023-06-02T18:53:50.994000",
+      "createdBy": "evan_litwak@cyberark.cloud.3357",
+      "updatedBy": "evan_litwak@cyberark.cloud.3357"
+    }
+  ]
+}
