@@ -1,6 +1,6 @@
 """Module to retrieve metadata from a secret in AWS Secrets Manager
 and use them to onboard the secret to CyberArk Privilege Cloud"""
-from cgitb import text
+
 import json
 import os
 import urllib.parse
@@ -127,6 +127,7 @@ def assembleOnboardingDict(admin_dict, secmeta_dict, secret_dict):
 
     status_code = 200
     response_body = "Onboarding dictionary assembled successfully."
+    print("secret_dict: ", secret_dict)
     onboarding_dict = {
         # values pulled from service account secret
         "subdomain": admin_dict.get("subdomain", None),
@@ -149,6 +150,7 @@ def assembleOnboardingDict(admin_dict, secmeta_dict, secret_dict):
         "host": secret_dict.get("host", None),
         "engine": secret_dict.get("engine", None),
         "port": secret_dict.get("port", None),
+        "secretId": secret_dict.get("secretId", None),
     }
 
     # If no address, get secret value for 'host', if any
@@ -275,6 +277,7 @@ def onboardAccount(onboarding_dict, session_token):
                 "host": onboarding_dict["host"],
                 "dbInstanceIdentifier": onboarding_dict["dbInstanceIdentifier"],
                 "engine": onboarding_dict["engine"],
+                "SecretNameInSecretStore": onboarding_dict["secretId"],
             },
         }
     )
@@ -282,15 +285,17 @@ def onboardAccount(onboarding_dict, session_token):
         "Content-Type": "application/json",
         "Authorization": f"Bearer {session_token}",
     }
-    response = requests.request("POST", url, headers=headers, data=payload, timeout=30)
-    if response.status_code == 409:
-        status_code = 409
-        response_body = json.dumps(
-            f"Account {onboarding_dict['account']} already exists"
-        )
-    else:
-        status_code = 500
-        response_body = json.dumps(f"{response.text}")
+    response = requests.request("POST", url, headers=headers, data=payload)
+    status_code = response.status_code
+    if status_code != 200:
+        if response.status_code == 409:
+            status_code = 409
+            response_body = json.dumps(
+                f"Account {onboarding_dict['account']} already exists"
+            )
+        else:
+            status_code = 500
+            response_body = response.text
 
     if DEBUG:
         print("================ onboardAccount() ================")
@@ -305,7 +310,7 @@ def addSHUserToSafe(onboarding_dict, session_token):
     # Uses safe name value in onboarding_dict to add Secrets Hub user to safe
     # Returns status_code == 200 or 409 (already exists) for success, response_body with message
 
-    safe_name = onboarding_dict['safe']
+    safe_name = onboarding_dict["safe"]
     status_code = 200
     response_body = f"The SecretsHub user was successfully added to safe {safe_name}."
 
@@ -318,8 +323,8 @@ def addSHUserToSafe(onboarding_dict, session_token):
                 "accessWithoutConfirmation": True,
                 "listAccounts": True,
                 "retrieveAccounts": True,
-                "viewSafeMembers": True
-            }
+                "viewSafeMembers": True,
+            },
         }
     )
     headers = {
@@ -330,7 +335,9 @@ def addSHUserToSafe(onboarding_dict, session_token):
     status_code = response.status_code
     if status_code != 200:
         if status_code == 409:
-            response_body = f"The SecretsHub user is already a member of safe {safe_name}."
+            response_body = (
+                f"The SecretsHub user is already a member of safe {safe_name}."
+            )
         else:
             response_body = response.text
 
@@ -553,6 +560,7 @@ def getSHSyncPolicy(onboarding_dict, session_token, sstore_id, tstore_id, filter
         return policy_id, status_code, response_body
 
     # -------------------------------------------
+    # begin getSHSyncPolicy()
 
     policy_id = ""
     status_code = 200
@@ -641,6 +649,9 @@ def lambda_handler(event, context):
         return {"statusCode": status_code, "body": response_body}
 
     # Assemble all info into a single onboarding dictionary
+    secret_dict[
+        "secretId"
+    ] = secret_id  # Add name of secret in cloud store to secret_dict
     onboarding_dict, status_code, response_body = assembleOnboardingDict(
         admin_dict, secmeta_dict, secret_dict
     )
@@ -661,14 +672,12 @@ def lambda_handler(event, context):
 
     # Onboard account into safe
     status_code, response_body = onboardAccount(onboarding_dict, session_token)
-    # !! DEBUG TEST !!
-    status_code = 201
     if status_code != 201:
         return {"statusCode": status_code, "body": response_body}
 
     # Add Secrets Hub user to safe
     status_code, response_body = addSHUserToSafe(onboarding_dict, session_token)
-    if status_code not in [ 200, 409 ]:
+    if status_code not in [200, 409]:
         return {"statusCode": status_code, "body": response_body}
 
     # Get Secrets Hub source store ID

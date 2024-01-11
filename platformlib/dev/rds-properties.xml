@@ -1,0 +1,6 @@
+         <!-- properties common to RDS secrets in AWS Secrets manager -->
+              <Property Name="engine" DisplayName="Engine" />
+              <Property Name="host" DisplayName="Host" />
+              <Property Name="dbInstanceIdentifier" DisplayName="dbInstanceIdentifier" />
+         <!-- property for SecretsHub to keep same name as in external secret store -->
+              <Property Name="SecretNameInSecretStore" DisplayName="Secret Name In Target Secret Store" />

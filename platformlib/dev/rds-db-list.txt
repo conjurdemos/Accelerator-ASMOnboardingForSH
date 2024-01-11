@@ -1,0 +1,11 @@
+To add:
+ - Amazon Aurora PostgreSQL-Compatible Edition
+ - Amazon Aurora MySQL-Compatible Edition
+ - RDS for PostgreSQL
+ - RDS for MariaDB
+ - RDS for Db2
+
+Added:
+ - RDS for MySQL
+ - RDS for Oracle
+ - RDS for SQL Server
