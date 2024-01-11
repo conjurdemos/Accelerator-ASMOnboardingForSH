@@ -1,5 +1,6 @@
 """Module to retrieve metadata from a secret in AWS Secrets Manager
 and use them to onboard the secret to CyberArk Privilege Cloud"""
+from cgitb import text
 import json
 import os
 import urllib.parse
@@ -300,6 +301,47 @@ def onboardAccount(onboarding_dict, session_token):
 
 
 # -------------------------------------------
+def addSHUserToSafe(onboarding_dict, session_token):
+    # Uses safe name value in onboarding_dict to add Secrets Hub user to safe
+    # Returns status_code == 200 or 409 (already exists) for success, response_body with message
+
+    safe_name = onboarding_dict['safe']
+    status_code = 200
+    response_body = f"The SecretsHub user was successfully added to safe {safe_name}."
+
+    url = f"https://{onboarding_dict['subdomain']}.privilegecloud.cyberark.cloud/passwordvault/api/safes/{safe_name}/members/"
+    payload = json.dumps(
+        {
+            "memberName": "SecretsHub",
+            "memberType": "User",
+            "permissions": {
+                "accessWithoutConfirmation": True,
+                "listAccounts": True,
+                "retrieveAccounts": True,
+                "viewSafeMembers": True
+            }
+        }
+    )
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {session_token}",
+    }
+    response = requests.request("POST", url, headers=headers, data=payload)
+    status_code = response.status_code
+    if status_code != 200:
+        if status_code == 409:
+            response_body = f"The SecretsHub user is already a member of safe {safe_name}."
+        else:
+            response_body = response.text
+
+    if DEBUG:
+        print("================ addSHUserToSafe() ================")
+        print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
+
+    return status_code, response_body
+
+
+# -------------------------------------------
 def getSHSourceStoreId(onboarding_dict, session_token):
     # Exactly one source store must already exist.
     # Uses values in onboarding_dict to retrieve source store ID from Secrets Hub
@@ -418,52 +460,9 @@ def getSHFilterForSafe(onboarding_dict, session_token, store_id):
 
 # -------------------------------------------
 def getSHTargetStoreId(onboarding_dict, session_token):
-    # Does not assume target store exists in Secrets Hub.
+    # Exactly one target store for account/region must already exist in Secrets Hub.
     # Uses account and region ID from dict to find existing target store.
-    # If store doesn't exist it creates it.
-    # Returns tstore_id, status_code == 200 or 201 for success, response_body with message
-
-    # -------------------------------------------
-    def createSHTargetStore(onboarding_dict, session_token):
-        url = f"https://{onboarding_dict['subdomain']}.secretshub.cyberark.cloud/api/secret-stores"
-        account_id = onboarding_dict["awsAccount"]
-        account_alias = onboarding_dict["awsAccountAlias"]
-        region_id = onboarding_dict["awsAccount"]
-        role_name = onboarding_dict["awsShRoleName"]
-        payload = json.dumps(
-            {
-                "type": "AWS_ASM",
-                "data": {
-                    "accountAlias": account_alias,
-                    "accountId": account_id,
-                    "regionId": region_id,
-                    "roleName": role_name,
-                },
-                "description": "Auto-created by onboarding lambda",
-                "name": "ASM target store: " + account_alias + region_id,
-            }
-        )
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {session_token}",
-        }
-        response = requests.request("POST", url, headers=headers, data=payload)
-        status_code = response.status_code
-        if status_code == 201:
-            tstore_dict = json.loads(response.text)
-            tstore_id = tstore_dict["id"]
-            response_body = f"Target store with store ID {tstore_id} created."
-        else:
-            response_body = response.text
-
-        if DEBUG:
-            print("================ createSHTargetStore() ================")
-            print(f"\ttstore_id: {tstore_id}")
-            print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
-
-        return tstore_id, status_code, response_body
-
-    # -------------------------------------------
+    # Returns tstore_id, status_code == 200 for success, response_body with message
 
     tstore_id = ""
     status_code = 200
@@ -478,25 +477,25 @@ def getSHTargetStoreId(onboarding_dict, session_token):
     status_code = response.status_code
     if status_code == 200:
         stores_dict = json.loads(response.text)
-        account_id = onboarding_dict["awsAccount"]
-        region_id = onboarding_dict["awsRegion"]
         # filter out Source & non-AWS stores because they don't have entries for AWS account/region
         isAwsTarget = lambda x: (
             (x["type"] == "AWS_ASM") & ("SECRETS_TARGET" in x["behaviors"])
         )
-        allTargets = [t for t in stores_dict["secretStores"] if isAwsTarget(t)]
+        allAwsTargets = [t for t in stores_dict["secretStores"] if isAwsTarget(t)]
+
+        account_id = onboarding_dict["awsAccount"]
+        region_id = onboarding_dict["awsRegion"]
         isTheTarget = lambda x: (
             (x["data"]["accountId"] == account_id)
             & (x["data"]["regionId"] == region_id)
         )
-        foundTarget = [a for a in allTargets if isTheTarget(a)]
+        foundTarget = [a for a in allAwsTargets if isTheTarget(a)]
         if len(foundTarget) == 0:  # target store not found - create it
-            tstore_id, status_code, response_body = createSHTargetStore(
-                onboarding_dict, session_token
-            )
-        elif len(foundTarget) > 1:
+            status_code = 404
+            response_body = f"Target store not found for account {account_id} and region {region_id}."
+        elif len(foundTarget) > 1:  # should not happen, but just in case
             status_code = 300
-            response_body = "More than one target store found."
+            response_body = f"More than one target store found for account {account_id} and region {region_id}."
         else:
             tstore_id = foundTarget.pop()["id"]
     else:
@@ -557,7 +556,7 @@ def getSHSyncPolicy(onboarding_dict, session_token, sstore_id, tstore_id, filter
 
     policy_id = ""
     status_code = 200
-    response_body = "Target store retrieved successfully"
+    response_body = "Sync policy retrieved successfully"
 
     url = (
         f"https://{onboarding_dict['subdomain']}.secretshub.cyberark.cloud/api/policies"
@@ -667,6 +666,11 @@ def lambda_handler(event, context):
     if status_code != 201:
         return {"statusCode": status_code, "body": response_body}
 
+    # Add Secrets Hub user to safe
+    status_code, response_body = addSHUserToSafe(onboarding_dict, session_token)
+    if status_code not in [ 200, 409 ]:
+        return {"statusCode": status_code, "body": response_body}
+
     # Get Secrets Hub source store ID
     sstore_id, status_code, response_body = getSHSourceStoreId(
         onboarding_dict, session_token
@@ -685,7 +689,7 @@ def lambda_handler(event, context):
     tstore_id, status_code, response_body = getSHTargetStoreId(
         onboarding_dict, session_token
     )
-    if status_code not in [200, 201]:
+    if status_code != 200:
         return {"statusCode": status_code, "body": response_body}
 
     # Create sync policy linking Source to Target - returns existing if found, creates if not found
