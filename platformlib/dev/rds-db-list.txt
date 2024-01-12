@@ -1,11 +1,11 @@
-To add:
- - Amazon Aurora PostgreSQL-Compatible Edition
+No platform in marketplace:
  - Amazon Aurora MySQL-Compatible Edition
- - RDS for PostgreSQL
- - RDS for MariaDB
- - RDS for Db2
 
 Added:
+ - Amazon Aurora PostgreSQL-Compatible Edition
+ - RDS for MariaDB
+ - RDS for Db2
+ - RDS for PostgreSQL
  - RDS for MySQL
  - RDS for Oracle
  - RDS for SQL Server

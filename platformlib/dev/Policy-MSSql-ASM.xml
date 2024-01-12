@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Device Name="Database">
   <Policies>
-    <Policy ID="MySQL-RDS" AutoChangeOnAdd="No" AutoVerifyOnAdd="No" EnableSplitPassword="No" ForceManualPasswordChange="No" PlatformBaseID="MSSql" PlatformBaseType="MSSql" PlatformBaseProtocol="ODBC">
+    <Policy ID="MSSql-ASM" AutoChangeOnAdd="No" AutoVerifyOnAdd="No" PlatformBaseID="MSSql" PlatformBaseType="MSSql" PlatformBaseProtocol="ODBC">
       <Properties>
         <Required>
           <Property Name="Username" />
@@ -11,8 +11,9 @@
           <Property Name="Address" />
           <Property Name="Port" />
           <Property Name="Database" />
-          <Property Name="Description" />
-          <Property Name="SecretNameInSecretStore" DisplayName="Secret Name In Target Secret Store" />
+          <Property Name="ReconcileIsWinAccount" />
+          <Property Name="Client" DisplayName="Tenant ID" />
+          <Property Name="SecretNameInSecretStore" DisplayName="ASM Secret Name" />
          <!-- properties common to RDS secrets in AWS Secrets manager -->
           <Property Name="engine" DisplayName="Engine" />
           <Property Name="host" DisplayName="Host" />
@@ -22,5 +23,10 @@
       <LinkedPasswords>
         <Link Name="ReconcileAccount" PropertyIndex="3" />
       </LinkedPasswords>
-      <TicketingSystem EnterTicketingInfo="Yes" ValidateTicketNumber="No" />
+      <TicketingSystem EnterTicketingInfo="No" ValidateTicketNumber="No" />
+      <PrivilegedSessionManagement />
+      <ConnectionComponents>
+        <ConnectionComponent Id="PSM-SQLServerMgmtStudio" />
+        <ConnectionComponent Id="PSM-SQLServerMgmtStudio-Database" />
+      </ConnectionComponents>
     </Policy></Policies></Device>

@@ -1,0 +1,28 @@
+    <Device Name="Database">
+      <Policies>
+        <Policy ID="MariaDB-ASM" AutoChangeOnAdd="No" AutoVerifyOnAdd="No" PlatformBaseID="MariaDB" PlatformBaseType="MariaDB" PlatformBaseProtocol="ODBC">
+          <Properties>
+            <Required>
+              <Property Name="Username" />
+            </Required>
+            <Optional>
+              <Property Name="DSN" />
+              <Property Name="Address" />
+              <Property Name="Port" />
+              <Property Name="Database" />
+         <!-- properties common to DB secrets in AWS Secrets manager -->
+              <Property Name="engine" DisplayName="Engine" />
+              <Property Name="host" DisplayName="Host" />
+              <Property Name="dbname" DisplayName="dbname" />
+              <Property Name="dbInstanceIdentifier" DisplayName="dbInstanceIdentifier" />
+         <!-- property for SecretsHub to keep same name as in external secret store -->
+              <Property Name="SecretNameInSecretStore" DisplayName="Secret Name In Target Secret Store" />
+            </Optional>
+          </Properties>
+          <LinkedPasswords>
+            <Link Name="ReconcileAccount" PropertyIndex="3" />
+          </LinkedPasswords>
+          <TicketingSystem EnterTicketingInfo="No" ValidateTicketNumber="No" />
+        </Policy>
+      </Policies>
+    </Device>

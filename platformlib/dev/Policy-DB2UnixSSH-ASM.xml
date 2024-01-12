@@ -1,0 +1,109 @@
+<Device Name="Database">
+  <Policies>
+    <Policy ID="DB2SSH-ASM" AutoChangeOnAdd="No" AutoVerifyOnAdd="No" PlatformBaseID="DB2UnixSSH" PlatformBaseType="Unix" PlatformBaseProtocol="SSH">
+    	<Properties>
+			<Required>
+		  		<Property Name="Username" />
+	 	 	<Property Name="Address" />
+			</Required>
+			<Optional>
+			<!-- properties common to DB secrets in AWS Secrets manager -->
+				<Property Name="engine" DisplayName="Engine" />
+				<Property Name="host" DisplayName="Host" />
+				<Property Name="dbInstanceIdentifier" DisplayName="dbInstanceIdentifier" />
+			<!-- property for SecretsHub to keep same name as in external secret store -->
+				<Property Name="SecretNameInSecretStore" DisplayName="Secret Name In Target Secret Store" />
+			</Optional>
+      	</Properties>
+      	<LinkedPasswords>
+			<Link Name="LogonAccount" PropertyIndex="1" />
+      	</LinkedPasswords>
+      	<PrivilegedSessionManagement />
+		<TicketingSystem EnterTicketingInfo="No" ValidateTicketNumber="No" />
+  	  	<ConnectionComponents>
+			<ConnectionComponent Id="PSM-SSH" />
+			<ConnectionComponent Id="SSH" />
+			<ConnectionComponent Id="PuTTY" Enable="No" />
+	  	</ConnectionComponents>
+	  	<OnDemandPrivilegesManager>
+			<Commands />
+			<Defaults />
+			<Authentication />
+			<CommandsGroups>
+				<CommandsGroup Name="SHELLS">
+					<Command Name="/bin/bash" />
+					<Command Name="/bin/csh" />
+					<Command Name="/bin/tcsh" />
+					<Command Name="/bin/ksh" />
+					<Command Name="/bin/ksh93" />
+					<Command Name="/usr/bin/bash" />
+					<Command Name="/usr/bin/csh" />
+					<Command Name="/usr/bin/tcsh" />
+					<Command Name="/usr/bin/ksh" />
+					<Command Name="/opt/freeware/bin/bash" />
+					<Command Name="/opt/freeware/bin/tcsh" />
+					<Command Name="/bin/sh" />
+					<Command Name="/usr/bin/sh" />
+					<Command Name="/usr/bin/ksh93" />
+				</CommandsGroup>
+				<CommandsGroup Name="BashProfile">
+					<Command Name="/bin/grep .*" />
+					<Command Name="/bin/uname -m" />
+					<Command Name="/sbin/consoletype stdout" />
+					<Command Name="/usr/bin/abrt-cli status .*" />
+					<Command Name="/usr/bin/cat /root/.cache/abrt/lastnotification" />
+					<Command Name="/usr/bin/date \+\%s" />
+					<Command Name="/usr/bin/dircolors --sh .*" />
+					<Command Name="/usr/bin/grep .*" />
+					<Command Name="/usr/bin/id -u" />
+					<Command Name="/usr/bin/ls /etc/bash_completion.d" />
+					<Command Name="/usr/bin/mkdir -p /root/.cache/abrt" />
+					<Command Name="/usr/bin/mktemp .colorlsXXX --tmpdir=/tmp" />
+					<Command Name="/usr/bin/mktemp --tmpdir=/root/.cache/abrt lastnotification.XXXXXXXX" />
+					<Command Name="/usr/bin/mv -i -f /root/.cache/abrt/lastnotification.\w{8} /root/.cache/abrt/lastnotification" />
+					<Command Name="/usr/bin/rm -i -f /tmp/.colorls\w{3}" />
+					<Command Name="/usr/bin/tput colors" />
+					<Command Name="/usr/bin/tty -s" />
+					<Command Name="/usr/bin/uname .*" />
+					<Command Name="/usr/libexec/grepconf.sh -c" />
+					<Command Name="/usr/sbin/lspci" />
+					<Command Name="/bin/ps -p \d+ -ocomm=" />
+					<Command Name="/bin/basename \w+" />
+					<Command Name="/bin/sed -n s\/\[ \t\#\]\.\*\$\/\/\; \/\.\/H\; \$ \{ x\; s\/\^\\n\/\/\; s\/\\n\/\:\/g\; p\; \} /usr/share/Modules/init/.modulespath" />
+				</CommandsGroup>
+				<CommandsGroup Name="tcshProfile">
+					<Command Name="/bin/grep .*" />
+					<Command Name="/bin/sed -n \/\^COLOR\.\*none\/Ip" />
+					<Command Name="/sbin/consoletype stdout" />
+					<Command Name="/usr/bin/cat /etc/DIR_COLORS" />
+					<Command Name="/usr/bin/cut .*" />
+					<Command Name="/usr/bin/dircolors -c .*" />
+					<Command Name="/usr/bin/grep .*" />
+					<Command Name="/usr/bin/id .*" />
+					<Command Name="/usr/bin/mktemp .colorlsXXX --tmpdir=/tmp" />
+					<Command Name="/usr/bin/rm -f /tmp/.colorls\w{3}" />
+					<Command Name="/usr/bin/sed -n \/\^COLOR\.\*none\/Ip" />
+					<Command Name="/usr/bin/test .*" />
+					<Command Name="/usr/bin/tput colors" />
+					<Command Name="/usr/bin/uname -m" />
+					<Command Name="/usr/libexec/grepconf.sh -c" />
+					<Command Name="/usr/sbin/lspci" />
+					<Command Name="/bin/uname -m" />
+					<Command Name="/bin/sed -n s\/\[ \t\#\]\.\*\$\/\/\; \/\.\/H\; \$ \{ x\; s\/\^\\n\/\/\; s\/\\n\/\:\/g\; p\; \} /usr/share/Modules/init/.modulespath" />
+					<Command Name="/bin/cut .*" />
+					<Command Name="/bin/sed s\|\$\|\;\|" />
+					<Command Name="/bin/sed s\|\\\(\[\^\=\]\*\\\)\=\\\(\[\^\=\]\*\\\)\|setenv \\1 \\2\|g" />
+				</CommandsGroup>
+				<CommandsGroup Name="sysconfig-network-linux4">
+					<Command Name="/usr/bin/system-config-network" />
+					<Command Name="/usr/bin/consolehelper-gtk" />
+					<Command Name="/usr/sbin/userhelper .*" />
+					<Command Name="/usr/sbin/system-config-network" />
+					<Command Name="/usr/sbin/system-config-network-tui" />
+					<Command Name="/usr/bin/consolehelper" />
+				</CommandsGroup>
+			</CommandsGroups>
+	  	</OnDemandPrivilegesManager>
+	</Policy>
+  </Policies>
+</Device>

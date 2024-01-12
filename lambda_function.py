@@ -15,6 +15,16 @@ DEBUG = True
 # environment variable containing name of Pcloud admin secret in ASM
 PCLOUD_ADMIN_SECRET_ENV_VAR = "PrivilegeCloudSecret"
 
+# mapping of ASM engine types to CyberArk platform IDs
+PLATFORM_MAP = {
+    "mysql": "MySQL-ASM",
+    "postgres": "PostgreSQL-ASM",
+    "mariadb": "MariaDB-ASM",
+    "oracle": "Oracle-ASM",
+    "sqlserver": "MSSQL-ASM",
+    "db2": "DB2SSH-ASM",
+}
+
 
 # -------------------------------------------
 def urlify(s):
@@ -133,33 +143,36 @@ def assembleOnboardingDict(admin_dict, secmeta_dict, secret_dict):
         "subdomain": admin_dict.get("subdomain", None),
         "svc_username": admin_dict.get("username", None),
         "svc_password": admin_dict.get("password", None),
-        "awsShRoleName": admin_dict.get("shRoleName", None),
-        "awsAccountAlias": admin_dict.get("accountAlias", None),
         # values pulled from secret metadata
         "awsAccount": secmeta_dict.get("AWS Account", None),
         "awsRegion": secmeta_dict.get("AWS Region", None),
         "safe": secmeta_dict.get("CyberArk Safe", None),
         "account": secmeta_dict.get("CyberArk Account", None),
-        # values pulled from RDS secret value - standard CyberArk properties
-        "address": secret_dict.get("address", None),
+        # values pulled from secret value to map to optional properties in CyberArk DB accounts
+        "secretId": secret_dict.get("secretId", None),
         "username": secret_dict.get("username", None),
         "password": secret_dict.get("password", None),
-        "platformId": secret_dict.get("platformId", None),
-        # RDS values pulled from secret value - additional properties in secret
-        "dbInstanceIdentifier": secret_dict.get("dbInstanceIdentifier", None),
         "host": secret_dict.get("host", None),
         "engine": secret_dict.get("engine", None),
         "port": secret_dict.get("port", None),
-        "secretId": secret_dict.get("secretId", None),
+        # map RDS values to respective CyberArk properties
+        "address": secret_dict.get("host", None),
+        "platformId": PLATFORM_MAP.get(secret_dict.get("engine", None), None),
     }
 
-    # If no address, get secret value for 'host', if any
-    if onboarding_dict["address"] is None:
-        onboarding_dict["address"] = secret_dict.get("host", None)
+    # RDS secrets may have dbname and/or dbInstanceIdentifier
+    dbInstId = secret_dict.get("dbInstanceIdentifier", None)
+    if dbInstId is not None:
+        onboarding_dict["dbInstanceIdentifier"] = dbInstId
+    dbName = secret_dict.get("dbname", None)
+    if dbName is not None:
+        onboarding_dict["dbname"] = dbName
+        onboarding_dict["database"] = dbName
 
-    # If no platformId, get value for 'CyberArk Platform' tag, if any
-    if onboarding_dict["platformId"] is None:
-        onboarding_dict["platformId"] = secmeta_dict.get("CyberArk Platform", None)
+    # Allow for capitalization of port - bug in SecretsHub?
+    # If no value for port, get secret value for 'host', if any
+    if onboarding_dict["port"] is None:
+        onboarding_dict["port"] = secret_dict.get("Port", None)
 
     # Validate no keys contain None as a value, if any, exit w/ 404
     none_keys = [key for key, value in onboarding_dict.items() if value is None]
@@ -262,32 +275,47 @@ def onboardAccount(onboarding_dict, session_token):
     )
 
     url = f"https://{onboarding_dict['subdomain']}.privilegecloud.cyberark.cloud/passwordvault/api/accounts"
-    payload = json.dumps(
-        {
-            "safeName": onboarding_dict["safe"],
-            "platformID": onboarding_dict["platformId"],
-            "name": onboarding_dict["account"],
-            "address": onboarding_dict["address"],
-            "userName": onboarding_dict["username"],
-            "secretType": "password",
-            "secret": onboarding_dict["password"],
-            "secretManagement": {"automaticManagementEnabled": True},
-            "platformAccountProperties": {
-                "port": onboarding_dict["port"],
-                "host": onboarding_dict["host"],
-                "dbInstanceIdentifier": onboarding_dict["dbInstanceIdentifier"],
-                "engine": onboarding_dict["engine"],
-                "SecretNameInSecretStore": onboarding_dict["secretId"],
-            },
+    # Set base payload of required parameters that are guaranteed to be in the onboarding_dict
+    payload_dict = {
+        "safeName": onboarding_dict["safe"],
+        "platformID": onboarding_dict["platformId"],
+        "name": onboarding_dict["account"],
+        "address": onboarding_dict["address"],
+        "userName": onboarding_dict["username"],
+        "secretType": "password",
+        "secret": onboarding_dict["password"],
+        "secretManagement": {"automaticManagementEnabled": True},
+        "platformAccountProperties": {
+            "port": onboarding_dict["port"],
+            "host": onboarding_dict["host"],
+            "engine": onboarding_dict["engine"],
+            "SecretNameInSecretStore": onboarding_dict["secretId"],
         }
-    )
+    }
+
+    # Add optional account parameters
+    if onboarding_dict.get("dbInstanceIdentifier", None) is not None:
+        payload_dict["platformAccountProperties"][
+            "dbInstanceIdentifier"
+        ] = onboarding_dict["dbInstanceIdentifier"]
+    if onboarding_dict.get("dbname", None) is not None:
+        payload_dict["platformAccountProperties"]["dbname"] = onboarding_dict["dbname"]
+        payload_dict["platformAccountProperties"]["database"] = onboarding_dict[
+            "dbname"
+        ]
+    # convert dict to json
+    payload_str = json.dumps(payload_dict)
+    print("payload_str: ", payload_str)
+    payload = json.loads(payload_str)
+    print("payload: ", payload)
+
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {session_token}",
     }
     response = requests.request("POST", url, headers=headers, data=payload)
     status_code = response.status_code
-    if status_code != 200:
+    if status_code != 201:
         if response.status_code == 409:
             status_code = 409
             response_body = json.dumps(
@@ -332,14 +360,13 @@ def addSHUserToSafe(onboarding_dict, session_token):
         "Authorization": f"Bearer {session_token}",
     }
     response = requests.request("POST", url, headers=headers, data=payload)
+    response_body = response.text
     status_code = response.status_code
-    if status_code != 200:
+    if status_code != 201:
         if status_code == 409:
             response_body = (
                 f"The SecretsHub user is already a member of safe {safe_name}."
             )
-        else:
-            response_body = response.text
 
     if DEBUG:
         print("================ addSHUserToSafe() ================")
@@ -397,7 +424,8 @@ def getSHFilterForSafe(onboarding_dict, session_token, store_id):
 
     # -------------------------------------------
     def createSHFilterForSafe(onboarding_dict, session_token, store_id, safe_name):
-        url = f"https://{onboarding_dict['subdomain']}.secretshub.cyberark.cloud/api/secret-stores{store_id}/filters"
+        filter_id = ""
+        url = f"https://{onboarding_dict['subdomain']}.secretshub.cyberark.cloud/api/secret-stores/{store_id}/filters"
         payload = json.dumps({"data": {"safeName": safe_name}, "type": "PAM_SAFE"})
         headers = {
             "Content-Type": "application/json",
@@ -677,10 +705,10 @@ def lambda_handler(event, context):
 
     # Add Secrets Hub user to safe
     status_code, response_body = addSHUserToSafe(onboarding_dict, session_token)
-    if status_code not in [200, 409]:
+    if status_code not in [201, 409]:
         return {"statusCode": status_code, "body": response_body}
 
-    # Get Secrets Hub source store ID
+    # Get Secrets Hub source store ID - store must exist
     sstore_id, status_code, response_body = getSHSourceStoreId(
         onboarding_dict, session_token
     )
@@ -694,7 +722,7 @@ def lambda_handler(event, context):
     if status_code not in [200, 201]:
         return {"statusCode": status_code, "body": response_body}
 
-    # Get Secrets Hub target store ID - returns existing if found, creates if not found
+    # Get Secrets Hub target store ID - store must exist
     tstore_id, status_code, response_body = getSHTargetStoreId(
         onboarding_dict, session_token
     )

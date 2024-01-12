@@ -1,0 +1,26 @@
+<Device Name="Database">
+	<Policies>
+		<Policy ID="AuroraPostgresSQLRDS-ASM" PlatformBaseID="Database" PlatformBaseType="Database" PlatformBaseProtocol="ODBC" AutoChangeOnAdd="No" AutoVerifyOnAdd="No">
+			<Properties>
+				<Required>
+					<Property Name="Username" />
+					<Property Name="Address" />
+					<Property Name="Database" />
+				</Required>
+				<Optional>
+					<Property Name="Port" />
+				<!-- properties common to DB secrets in AWS Secrets manager -->
+					<Property Name="engine" DisplayName="Engine" />
+					<Property Name="host" DisplayName="Host" />
+					<Property Name="dbInstanceIdentifier" DisplayName="dbInstanceIdentifier" />
+				<!-- property for SecretsHub to keep same name as in external secret store -->
+					<Property Name="SecretNameInSecretStore" DisplayName="Secret Name In Target Secret Store" />
+				</Optional>
+			</Properties>
+			<LinkedPasswords>
+            	<Link Name="ReconcileAccount" PropertyIndex="3" />
+			</LinkedPasswords>
+			<TicketingSystem EnterTicketingInfo="No" ValidateTicketNumber="No" />
+		</Policy>
+	</Policies>
+</Device>
