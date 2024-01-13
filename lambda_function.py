@@ -293,22 +293,28 @@ def onboardAccount(onboarding_dict, session_token):
         }
     }
 
-    # Add optional account parameters
+    # Add optional DB creation parameters
     if onboarding_dict.get("dbInstanceIdentifier", None) is not None:
         payload_dict["platformAccountProperties"][
             "dbInstanceIdentifier"
         ] = onboarding_dict["dbInstanceIdentifier"]
+    '''
+    This may need revisiting as dbName apparently means different things per DB type.
+    from: https://stackoverflow.com/questions/56763648/what-is-the-difference-between-dbinstanceidentifier-and-dbname-for-rds-create-db
+    DBName does different things depending on the engine:
+        - the name of a blank/empty schema that you want the service to automatically create inside your new instance (MySQL, Aurora/MySQL, and MariaDB, the default is not to create a schema; this option serves no real purpose unless for some reason you want one empty schema to be created automatically)
+        - the name it will use instead of the default, to create a new database after launch (Postgres, default postgres is created otherwise)
+        - the SID of the instance (Oracle, default ORCL)
+        - a forbidden field (MSSQL).
+    '''
+
     if onboarding_dict.get("dbname", None) is not None:
         payload_dict["platformAccountProperties"]["dbname"] = onboarding_dict["dbname"]
         payload_dict["platformAccountProperties"]["database"] = onboarding_dict[
             "dbname"
         ]
     # convert dict to json
-    payload_str = json.dumps(payload_dict)
-    print("payload_str: ", payload_str)
-    payload = json.loads(payload_str)
-    print("payload: ", payload)
-
+    payload = json.dumps(payload_dict)
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {session_token}",
