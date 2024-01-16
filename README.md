@@ -9,29 +9,29 @@
 
 ## Prerequisites
 - Roles:
+  - **CyberArk Admin (human)**
+    - Imports platforms for ASM accounts and creates safes for secret onboarding
+    - Creates Oauth2 service user identity for lambda to use for onboarding
+    - CyberArk Identity least-privilege role required:
+      - System Adminstrator
+  - **CyberArk Identity service user (non-human Oauth2 confidential client)**
+    - Creates accounts in safes and creates Secrets Hub sync policies
+    - CyberArk Identity least-privilege roles required:
+      - Privilege Cloud Users
+      - Secrets Manager - Secrets Hub Administrators
   - **AWS admin user (human)**
     - Requires admin rights to:
       - Lambda - to create & test the lambda function
-      - AWS Secrets Manager - to create the CyberArk admin secret
+      - AWS Secrets Manager - to create the CyberArk admin secret, and tag secrets for onboarding
   - **AWS IAM role for lambda**
     - Retrieves secret tags and values
     - Least-privilege permissions required:
       - Allow: secretsmanager:ListSecrets
       - Allow: secretsmanager:GetSecretValue
       - Allow: secretsmanager:DescribeSecret
-  - **CyberArk Privilege Cloud admin (human)**
-    - Imports platforms for ASM accounts and creates safes for secret onboarding
-    - Least-privilege role required:
-      - Privilege Cloud Administrators
-  - **CyberArk Identity service user (non-human Oauth2 confidential client)**
-    - Creates accounts in safes and creates Secrets Hub sync policies
-    - Least-privilege roles required:
-      - Privilege Cloud Users
-      - Secrets Manager - Secrets Hub Administrators
 - Resources:
   - A Safe in Privilege Cloud with:
-    - the CyberArk Identity service user as safe member with Account Managers permissions, and
-    - the 'SecretsHub' user as member with Access and Workflow permissions.
+    - the CyberArk Identity Oauth2 service user as safe member with Account Managers permissions
   - An RDS secret in ASM, tagged as described below
   - The provided lambda function, configured as below
 
@@ -39,7 +39,7 @@
 ### Step One: Privilege Cloud setup
 - Role: CyberArk Privilege Cloud admin
 - Tasks:
-  - Import platforms for relevant RDS databases
+  - Import platforms for relevant RDS databases (see platformlib directory in this repo)
   - Create safe w/ Oauth2 service user as member
     - The CyberArk admin service user must be a member with Account Managers permissions.
 
@@ -59,10 +59,10 @@
     - secret values: automatically created per the RDS database
     ![Onboarding secret values](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/rds-values.png?raw=true)
     - secret tags:
-      - CyberArk Safe - name of safe, see specifications above
-      - CyberArk Platform - name of platform with RDS-specific properties added
+      - Sourced by CyberArk - no value needed - tags secret for SecretsHub syncing
+      - CyberArk Safe - name of safe, see step One above
+      - CyberArk Platform - name of platform with ASM-specific properties added (see platformlib directory in this repo)
       - CyberArk Account - name to give account in Safe
-      - Sourced by CyberArk - no value needed
     ![Onboarding secret tags](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/rds-tags.png?raw=true)
 
 ### Step Three: AWS Lambda setup
