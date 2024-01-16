@@ -1,0 +1,22 @@
+title Accelerator - ASM Onboarding to CyberArk Vault
+
+note over PCloud admin (human):Setup
+PCloud admin (human)->CYBR PCloud:import ASM RDS\nplatforms
+PCloud admin (human)->CYBR Identity:create Oauth2 service user
+PCloud admin (human)->CYBR PCloud:create safe\nfor onboarding
+PCloud admin (human)->CYBR PCloud:add Oauth2 service\nuser as safe member
+
+AWS Admin (human)->lambda:upload\ndeployment-package.zip\nto create lambda
+AWS Admin (human)->lambda: grant ASM role
+AWS Admin (human)->ASM:create Oauth2 service user secret
+AWS Admin (human)->Env:create env var for Oauth2\nservice user secret
+
+
+note over lambda:Execution Flow
+lambda->Env:get name of password secret
+lambda->ASM:get Pcloud\nadmin creds
+lambda->Event:get name of ASM secret\nto onboard
+lambda->ASM:get secret\nto onboard
+lambda->CYBR PCloud:validate & onboard secret to safe
+lambda->CYBR PCloud:add SecretsHub user to safe
+lambda->SecretsHub:create Filter\nand Policy
