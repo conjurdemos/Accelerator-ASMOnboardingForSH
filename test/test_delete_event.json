@@ -1,0 +1,7 @@
+{ "detail": {
+    "requestParameters": {
+      "eventName": "DeleteSecret",
+      "name": "REPLACE_THIS_WITH_THE_NAME_OF_THE_ASM_SECRET_THAT_WAS_DELETED"
+    }
+  }
+}

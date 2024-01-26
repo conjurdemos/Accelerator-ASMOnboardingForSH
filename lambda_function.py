@@ -62,11 +62,17 @@ def validateSecretMetadata(secrets_manager_client, secret_id):
         response_body = json.dumps(f"Error getting description for secret: {e}")
     else:
         tags = response.get("Tags", [])
-        secmeta_dict = {tag["Key"]: tag["Value"] for tag in tags}
+        secmeta_dict = {tag["Key"].strip(): tag["Value"].strip() for tag in tags}
 
         if "Sourced by CyberArk" not in secmeta_dict:
             status_code = 404
-            response_body = f"Secret {secret_id} not sourced by CyberArk"
+            response_body = f"Secret {secret_id} not tagged with 'Sourced by CyberArk'. Check upper/lower case & for any trailing space chars."
+        elif "CyberArk Safe" not in secmeta_dict:
+            status_code = 404
+            response_body = f"Secret {secret_id} not tagged with 'CyberArk Safe'. Check upper/lower case & for any trailing space chars."
+        elif "CyberArk Account" not in secmeta_dict:
+            status_code = 404
+            response_body = f"Secret {secret_id} not tagged with 'CyberArk Account'. Check upper/lower case & for any trailing space chars."
         else:
             # parse secret ARN for account # & region ID
             secmeta_dict["AWS Account"] = response.get("ARN").split(":")[4]
@@ -189,8 +195,8 @@ def assembleOnboardingDict(admin_dict, secmeta_dict, secret_dict):
 
 
 # -------------------------------------------
-def authnCyberArk(onboarding_dict):
-    # uses Pcloud creds in onboarding_dict to authenticate to CyberArk Identity
+def authnCyberArk(admin_dict):
+    # uses Pcloud creds in admin_dict to authenticate to CyberArk Identity
     # returns session_token (CyberArk Identity JWT) to use in further CyberArk API calls
 
     session_token = None
@@ -198,8 +204,8 @@ def authnCyberArk(onboarding_dict):
     response_body = "Successfully authenticated to CyberArk Privilege Cloud."
 
     # Authenticate to CyberArk Identity
-    url = f"https://{onboarding_dict['subdomain']}.cyberark.cloud/api/idadmin/oauth2/platformtoken"
-    payload = f"grant_type=client_credentials&client_id={urlify(onboarding_dict['svc_username'])}&client_secret={urlify(onboarding_dict['svc_password'])}"
+    url = f"https://{admin_dict['subdomain']}.cyberark.cloud/api/idadmin/oauth2/platformtoken"
+    payload = f"grant_type=client_credentials&client_id={urlify(admin_dict['username'])}&client_secret={urlify(admin_dict['password'])}"
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     response = requests.request("POST", url, headers=headers, data=payload)
     if response.status_code == 200:
@@ -210,12 +216,12 @@ def authnCyberArk(onboarding_dict):
         if session_token is None:
             status_code = 401
             response_body = json.dumps(
-                f"There was a problem authenticating to: {onboarding_dict['subdomain']}.privilegecloud.cyberark.cloud"
+                f"There was a problem authenticating to: {admin_dict['subdomain']}.privilegecloud.cyberark.cloud"
             )
     else:
         status_code = 500
         response_body = json.dumps(
-            f"There was a problem authenticating to: {onboarding_dict['subdomain']}.privilegecloud.cyberark.cloud"
+            f"There was a problem authenticating to: {admin_dict['subdomain']}.privilegecloud.cyberark.cloud"
         )
 
     if DEBUG:
@@ -290,7 +296,7 @@ def onboardAccount(onboarding_dict, session_token):
             "host": onboarding_dict["host"],
             "engine": onboarding_dict["engine"],
             "SecretNameInSecretStore": onboarding_dict["secretId"],
-        }
+        },
     }
 
     # Add optional DB creation parameters
@@ -298,7 +304,7 @@ def onboardAccount(onboarding_dict, session_token):
         payload_dict["platformAccountProperties"][
             "dbInstanceIdentifier"
         ] = onboarding_dict["dbInstanceIdentifier"]
-    '''
+    """
     Currently setting database to the value of dbname.
     This may need revisiting as apparently dbname means different things for different DB engines.
 
@@ -308,7 +314,7 @@ def onboardAccount(onboarding_dict, session_token):
      - the name it will use instead of the default, to create a new database after launch (Postgres, default postgres is created otherwise)
      - the SID of the instance (Oracle, default ORCL)
      - a forbidden field (MSSQL).
-    '''
+    """
     if onboarding_dict.get("dbname", None) is not None:
         payload_dict["platformAccountProperties"]["dbname"] = onboarding_dict["dbname"]
         payload_dict["platformAccountProperties"]["database"] = onboarding_dict[
@@ -639,6 +645,56 @@ def getSHSyncPolicy(onboarding_dict, session_token, sstore_id, tstore_id, filter
     return policy_id, status_code, response_body
 
 
+# -------------------------------------------
+def deleteAccount(admin_dict, session_token, secret_id):
+    # Uses secret_id to lookup account in vault and delete it.
+    # Returns status_code == 204 for success, response_body with message
+
+    url = f"https://{admin_dict['subdomain']}.privilegecloud.cyberark.cloud/passwordvault/api/accounts"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {session_token}",
+    }
+    search_url = url + f"?search={secret_id}"
+    response = requests.request("get", search_url, headers=headers)
+    status_code = response.status_code
+    response_body = response.text
+    if status_code == 200:
+        account_dict = json.loads(response.text)
+        num_found = account_dict["count"]
+        match num_found:
+            case 1:
+                account_id = account_dict["value"][0]["id"]
+                account_name = account_dict["value"][0]["name"]
+                safe_name = account_dict["value"][0]["safeName"]
+                delete_url = url + f"/{account_id}"
+                response = requests.request("delete", delete_url, headers=headers)
+                status_code = response.status_code
+                if status_code == 204:
+                    response_body = f"Account {account_name} in safe {safe_name} deleted successfully."
+                else:
+                    response_body = response.text
+            case 0:
+                status_code = 404
+                response_body = f"No account found for secret_id: {secret_id}"
+            case _:
+                status_code = 409  # 409 == 'conflict'
+                response_body = (
+                    f"More than one account found for secret_id: {secret_id}"
+                )
+    else:
+        response_body = (
+            f"Error searching for account corresponding to secret_id: {secret_id}"
+        )
+
+    if DEBUG:
+        print("================ deleteAccount() ================")
+        print(f"\tsecret_id: {secret_id}")
+        print(f"\tstatus_code: {status_code}\n\tresponse: {response_body}")
+
+    return status_code, response_body
+
+
 ##########################################################################################
 # Lambda function handler (main entrypoint)
 ##########################################################################################
@@ -647,18 +703,27 @@ def getSHSyncPolicy(onboarding_dict, session_token, sstore_id, tstore_id, filter
 def lambda_handler(event, context):
     prologOut(event, context)
 
-    # Extract the ID of secret to onboard from the triggering event
-    secret_id = event["detail"]["requestParameters"]["name"]
+    # Get the event body from the event
+    try:
+        if (event["body"]) and (event["body"] != None):
+            event = json.loads(event["body"])
+            print("Triggered by API")
+        else:
+            return {"statusCode": 502, "body": "No body in API event."}
+    except KeyError:
+        print("Triggered by CloudWatch")
+
+    # Extract the event name & ID of secret from the triggering event
+    try:
+        event_name = event["detail"]["eventName"]
+        if event_name not in ["CreateSecret", "DeleteSecret"]:
+            return {"statusCode": 502, "body": f"Unsupported event name:\n{event}"}
+        secret_id = event["detail"]["requestParameters"]["name"]
+    except KeyError:
+        return {"statusCode": 502, "body": f"Malformed event:\n{event}"}
 
     # Initialize a client for AWS Secrets Manager
     secrets_manager_client = boto3.client("secretsmanager")
-
-    # Validate secret is correctly tagged for onboarding
-    secmeta_dict, status_code, response_body = validateSecretMetadata(
-        secrets_manager_client, secret_id
-    )
-    if status_code != 200:
-        return {"statusCode": status_code, "body": response_body}
 
     # Retrieve from env var the ID of ASM secret storing admin creds
     pcloud_secret_id = os.environ.get(PCLOUD_ADMIN_SECRET_ENV_VAR, None)
@@ -676,6 +741,27 @@ def lambda_handler(event, context):
     if status_code != 200:
         return {"statusCode": status_code, "body": response_body}
 
+    # Authenticate to Privilege Cloud
+    session_token, status_code, response_body = authnCyberArk(admin_dict)
+    if status_code != 200:
+        return {"statusCode": status_code, "body": response_body}
+
+    # if a Delete event, delete account and exit
+    if event_name == "DeleteSecret":
+        status_code, response_body = deleteAccount(admin_dict, session_token, secret_id)
+        return {"statusCode": status_code, "body": response_body}
+
+    ###############
+    # Onboarding workflow from here on...
+    ###############
+
+    # Validate secret is correctly tagged for onboarding
+    secmeta_dict, status_code, response_body = validateSecretMetadata(
+        secrets_manager_client, secret_id
+    )
+    if status_code != 200:
+        return {"statusCode": status_code, "body": response_body}
+
     # Retrieve the value of the secret to onboard
     secret_dict, status_code, response_body = getAsmSecretValue(
         secrets_manager_client, secret_id
@@ -684,21 +770,15 @@ def lambda_handler(event, context):
         return {"statusCode": status_code, "body": response_body}
 
     # Assemble all info into a single onboarding dictionary
-    secret_dict[
-        "secretId"
-    ] = secret_id  # Add name of secret in cloud store to secret_dict
+    secret_dict["secretId"] = secret_id
+    # Add name of secret in cloud store to secret_dict
     onboarding_dict, status_code, response_body = assembleOnboardingDict(
         admin_dict, secmeta_dict, secret_dict
     )
     if status_code != 200:
         return {"statusCode": status_code, "body": response_body}
 
-    # Authenticate to Privilege Cloud
-    session_token, status_code, response_body = authnCyberArk(onboarding_dict)
-    if status_code != 200:
-        return {"statusCode": status_code, "body": response_body}
-
-    """ Skip safe creation for now
+    """ Safe must already exist with admin user as member w/ Account Manager perms
     # Create safe in Privilege Cloud
     status_code, response_body = createSafe(onboarding_dict, session_token)
     if status_code != 201:
