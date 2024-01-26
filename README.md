@@ -32,7 +32,6 @@
 - Resources:
   - A Safe in Privilege Cloud with:
     - the CyberArk Identity Oauth2 service user as safe member with preset Account Managers permissions
-    - **Be sure to use the "Account Managers" preset.**
   - An ASM secret containing values for CyberArk Identity Oauth2 service user credentials and tenant subdomain.
   - An RDS secret in ASM, tagged as described below.
   - The provided lambda function, configured as below.
@@ -41,12 +40,20 @@
 ### Step One: Privilege Cloud setup
 - Role: CyberArk Privilege Cloud admin
 - Tasks:
-  - Import platforms for relevant RDS databases (see platformlib directory in this repo)
+  - Create Oauth2 service user in CyberArk Identity with these permissions:
+    - Privilege Cloud Users
+    - Secrets Manager - Secrets Hub Administrators
+  - Create the safe for onboarding ASM secrets into
+    - Add the Oauth2 service user as member
+    - The CyberArk admin service user must be a member with Account Managers permissions.
+      - **Be sure to use the "Account Managers" preset.**
+  - Import database platforms for relevant RDS databases
+    - See platformlib directory in this repo
+    - If you change platform names, you will need to modify the PLATFORM_MAP dictionary near the top of lambda_function.py.
   - In Privilege Cloud->Adminstration->Configuration Options, add "SecretNameInSecretStore" to Search Properties 
     ![Pcloud Admin Config](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/Pcloud-Admin-Add-SearchProperty.png?raw=true)
+    - "SecretNameInSecretStore" added to Search Properties
     ![Pcloud Property Added](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/Pcloud-Added-SecretNameInSecretStore.png?raw=true)
-    - Create safe w/ Oauth2 service user as member
-    - The CyberArk admin service user must be a member with Account Managers permissions.
 
 ### Step Two: AWS Secrets Manager setup
 - Role: AWS admin user
