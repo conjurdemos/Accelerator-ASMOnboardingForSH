@@ -7,6 +7,13 @@
 - Enable SecretsHub to sync secrets back to the same ASM secret without loss of information.
 - Enable CPM to rotate database credential.
 
+## Workflows
+![Day 1 Workflow](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/Day1-flow.png?raw=true)
+<br>
+![Day 2 - Creation Workflow](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/Day2-create-flow.png?raw=true)
+<br> 
+![Day 2 - Delete Workflow](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/Day2-delete-flow.png?raw=true)
+
 ## Prerequisites
 - Roles:
   - **CyberArk Admin (human)**
@@ -101,7 +108,28 @@
     - https://docs.aws.amazon.com/lambda/latest/dg/configuration-vpc.html
     - https://aws.amazon.com/blogs/security/how-to-connect-to-aws-secrets-manager-service-within-a-virtual-private-cloud/
 
+### Step Four: Setup Lambda API for Day 1 batch onboarding
+- Helpful doc pages:
+  - https://docs.aws.amazon.com/apigateway/latest/developerguide/getting-started-with-lambda-integration.html
+  - skip to "Create a Hello World! API" section
+- Invoking the API:
+  - modify the scripts in the ./api subdirectory with your API URL
+
+### Step Five: CloudWatch Event Configuration for Day 2 operations
+- Helpful doc pages:
+  - https://docs.aws.amazon.com/secretsmanager/latest/userguide/monitoring-eventbridge.html
+  - https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-get-started.html
+  - https://docs.aws.amazon.com/secretsmanager/latest/userguide/monitoring-cloudtrail_examples.html#monitoring-cloudtrail_examples_operations
+- Create CloudWatch rule:
+  ![Create CW Rule](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/cw-create-rule-1.png?raw=true)
+- Build event pattern:
+  ![Build Event Pattern](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/cw-create-rule-2.png?raw=true)
+- Select lambda target:
+  ![Select Lambda Target](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/cw-create-rule-3.png?raw=true)
+- Review & Create:
+  ![Review & Create](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/cw-create-rule-4.png?raw=true)
+
 ### Sequence Diagram:
-![Onboarding Workflow](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/ASMOnboardingFlow.png?raw=true)
 Edit ./img/ASMOnboardingFlow.txt with https://sequencediagram.org
+![Onboarding Workflow](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/ASMOnboardingFlow.png?raw=true)
 

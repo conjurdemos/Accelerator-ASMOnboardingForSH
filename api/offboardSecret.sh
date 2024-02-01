@@ -10,7 +10,9 @@ fi
 
 secretName=$1
 
-curl -v	-X DELETE $LAMBDA_URL				\
+echo "Deleting secret $secretName..."
+response=$(curl -s -X DELETE $LAMBDA_URL		\
+        --write-out '\n%{http_code}'                    \
   	-H 'content-type: application/json' 		\
 	-d "{						\
 	      \"detail\": {				\
@@ -19,5 +21,15 @@ curl -v	-X DELETE $LAMBDA_URL				\
 			\"name\": \"$secretName\"	\
 		   }					\
 	      }						\
-	    }"
-echo
+	    }")
+http_code=$(tail -n1 <<< "$response")  # get http_code on last line
+content=$(sed '$ d' <<< "$response")   # trim http_code
+
+case $http_code in
+  204)
+	echo "Account corresponding to $secretName deleted."
+	;;
+  *)
+	echo $content
+	;;
+esac

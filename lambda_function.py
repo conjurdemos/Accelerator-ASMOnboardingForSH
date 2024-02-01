@@ -64,19 +64,24 @@ def validateSecretMetadata(secrets_manager_client, secret_id):
         tags = response.get("Tags", [])
         secmeta_dict = {tag["Key"].strip(): tag["Value"].strip() for tag in tags}
 
+        # verify required tags are found
         if "Sourced by CyberArk" not in secmeta_dict:
             status_code = 404
             response_body = f"Secret {secret_id} not tagged with 'Sourced by CyberArk'. Check upper/lower case & for any trailing space chars."
         elif "CyberArk Safe" not in secmeta_dict:
             status_code = 404
             response_body = f"Secret {secret_id} not tagged with 'CyberArk Safe'. Check upper/lower case & for any trailing space chars."
-        elif "CyberArk Account" not in secmeta_dict:
-            status_code = 404
-            response_body = f"Secret {secret_id} not tagged with 'CyberArk Account'. Check upper/lower case & for any trailing space chars."
         else:
             # parse secret ARN for account # & region ID
             secmeta_dict["AWS Account"] = response.get("ARN").split(":")[4]
             secmeta_dict["AWS Region"] = response.get("ARN").split(":")[3]
+
+        # If "CyberArk Account" tag found, use its value, else use secretId for account name
+        accountName = secmeta_dict.get("CyberArk Account", None)
+        if accountName is None:
+            # replace invalid '-' chars - may need to revisit
+            accountName = secret_id.replace('/','-')
+            secmeta_dict["CyberArk Account"] = accountName
 
     if DEBUG:
         print("================ validateSecretTags() ================")
@@ -703,24 +708,25 @@ def deleteAccount(admin_dict, session_token, secret_id):
 def lambda_handler(event, context):
     prologOut(event, context)
 
-    # Get the event body from the event
+    # Get the event body from API event
     try:
         if (event["body"]) and (event["body"] != None):
             event = json.loads(event["body"])
-            print("Triggered by API")
+            print(f"Lambda triggered by API with:\n{event}")
         else:
             return {"statusCode": 502, "body": "No body in API event."}
     except KeyError:
-        print("Triggered by CloudWatch")
+        print(f"Lambda triggered by CloudWatch with:\n{event}")
 
     # Extract the event name & ID of secret from the triggering event
-    try:
-        event_name = event["detail"]["eventName"]
-        if event_name not in ["CreateSecret", "DeleteSecret"]:
-            return {"statusCode": 502, "body": f"Unsupported event name:\n{event}"}
+    event_name = event["detail"]["eventName"]
+    if event_name == "CreateSecret":
         secret_id = event["detail"]["requestParameters"]["name"]
-    except KeyError:
-        return {"statusCode": 502, "body": f"Malformed event:\n{event}"}
+    elif event_name == "DeleteSecret":
+        secret_id = event["detail"]["requestParameters"]["secretId"]
+    else:
+        print(f"eventName: {eventName} - no match for 'CreateSecret' or 'DeleteSecret'")
+        return {"statusCode": 502, "body": f"Unsupported event name:\n{event}"}
 
     # Initialize a client for AWS Secrets Manager
     secrets_manager_client = boto3.client("secretsmanager")
