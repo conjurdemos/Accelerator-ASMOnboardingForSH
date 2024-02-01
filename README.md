@@ -121,17 +121,13 @@
   - https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-get-started.html
   - https://docs.aws.amazon.com/secretsmanager/latest/userguide/monitoring-cloudtrail_examples.html#monitoring-cloudtrail_examples_operations
 - Create CloudWatch rule:
-<br>
-  ![Create CW Rule](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/cw-create-rule-1.png?raw=true)
+  - ![Create CW Rule](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/cw-create-rule-1.png?raw=true)
 - Build event pattern:
-<br>
-  ![Build Event Pattern](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/cw-create-rule-2.png?raw=true)
+  - ![Build Event Pattern](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/cw-create-rule-2.png?raw=true)
 - Select lambda target:
-<br>
-  ![Select Lambda Target](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/cw-create-rule-3.png?raw=true)
+  - ![Select Lambda Target](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/cw-create-rule-3.png?raw=true)
 - Review & Create:
-<br>
-  ![Review & Create](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/cw-create-rule-4.png?raw=true)
+  - ![Review & Create](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/cw-create-rule-4.png?raw=true)
 
 ### Sequence Diagram:
 Edit ./img/ASMOnboardingFlow.txt with https://sequencediagram.org
