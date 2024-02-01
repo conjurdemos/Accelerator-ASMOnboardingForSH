@@ -87,7 +87,7 @@
 
 **NOTE**: Take care with capitalization and ensure there are no trailing spaces in keys.
 
-    ![Onboarding secret tags](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/rds-tags.png?raw=true)
+- ![Onboarding secret tags](https://github.com/conjurdemos/Accelerator-ASMOnboardingForSH/blob/main/img/rds-tags.png?raw=true)
 
 ### Step Three: AWS Lambda setup
 - Role: AWS admin user
